@@ -1,0 +1,16 @@
+{
+  "name": "project",
+  "version": "0.1.0",
+  "description": "certificate project",
+  "private": true,
+  "repository": {},
+  "dependencies": {
+    "express": "4.21.1",
+    "body-parser": "^1.20.3",
+    "multer": "1.4.5-lts.1",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
