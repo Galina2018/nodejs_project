@@ -5,6 +5,5 @@ async function getPageMain() {
   const response = await fetch('/main', {
     method: 'GET',
   });
-  const res = await response.text();
-  console.log('res', res);
+  const res = await response.json();
 }
