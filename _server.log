@@ -1,0 +1,11 @@
+2024-12-13 9:07:10 [7380] Error: connect ECONNREFUSED 127.0.0.1:3306
+2024-12-13 9:09:28 [7380] Error: connect ECONNREFUSED 127.0.0.1:3306
+2024-12-13 9:33:00 [7380] TypeError: Cannot read property 'status' of undefined
+2024-12-13 9:33:59 [7380] ReferenceError: res is not defined
+2024-12-13 9:38:21 [7380] ReferenceError: res is not defined
+2024-12-13 9:42:08 [7380] ReferenceError: res is not defined
+2024-12-13 9:44:45 [7380] ReferenceError: res is not defined
+2024-12-13 9:46:09 [7380] ReferenceError: res is not defined
+2024-12-13 14:29:40 [7380] ReferenceError: res is not defined
+2024-12-13 14:29:42 [7380] ReferenceError: res is not defined
+2024-12-13 14:39:23 [7380] ReferenceError: headerContact is not defined

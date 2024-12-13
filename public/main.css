@@ -44,6 +44,12 @@ section {
   padding: 50px 20px;
 }
 
+section .menu button {
+  width: 220px;
+  margin-top: 0px;
+  margin-bottom: 20px;
+}
+
 .about,
 .services,
 .blog {

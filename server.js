@@ -41,20 +41,20 @@ const upload = multer({ storage: storage });
 const port = 7380;
 const logFN = path.join(__dirname, '_server.log');
 
+webserver.use(bodyParser.text({}));
 webserver.use(bodyParser.json({}));
 webserver.use(express.urlencoded({ extended: true }));
 webserver.use(express.static(path.resolve(__dirname, 'public')));
 
-function reportServerError(error, res) {
-  res.status(500).end();
+function reportServerError(error) {
+  // res.status(500).end();
   logLineAsync(logFN, `[${port}] ` + error);
 }
-let dataMain;
-webserver.get('/main', async (req, res) => {
-  console.log('in main');
+async function getDataMainPage() {
+  let dataMain;
   let connection = null;
   try {
-    connection = await newConnectionFactory(pool, res);
+    connection = await newConnectionFactory(pool, (res = {}));
     let result = await selectQueryFactory(
       connection,
       'select content from indpages',
@@ -71,7 +71,7 @@ webserver.get('/main', async (req, res) => {
       contact: row.contact,
       foto: row.foto,
       motivation: row.motivation,
-      servoces: row.services,
+      services: row.services,
       articles: row.articles,
     }));
     let logo = await selectQueryFactory(
@@ -90,21 +90,146 @@ webserver.get('/main', async (req, res) => {
     );
     menuMain = menuMain.map((row) => row.name);
     dataMain[0].menu = menuMain;
-    res.render('pages/main', {
-      data: dataMain,
-    });
+    // console.log('data in func', dataMain);
+    return dataMain;
+  } catch (error) {
+    reportServerError(error);
+  } finally {
+    if (connection) connection.release();
+  }
+}
+
+webserver.get('/main', async (req, res) => {
+  let data;
+  try {
+    data = await getDataMainPage();
+    res.render('pages/main', { data });
+  } catch (error) {
+    reportServerError(error, res);
+  }
+  // console.log('data in main', data);
+});
+
+webserver.get('/admin', async (req, res) => {
+  let data;
+  try {
+    data = await getDataMainPage();
+    res.render('pages/admin', { data });
+  } catch (error) {
+    reportServerError(error, res);
+  }
+  // console.log('data in admin', data);
+});
+
+webserver.post(
+  '/addHeaderChange',
+  upload.fields([{ name: 'headerLogo', maxCount: 1 }]),
+  async (req, res) => {
+    let headerMenu = Object.keys(req.body)
+      .map((e) => {
+        if (e.match(/headerMenu\d{1}/)) return req.body[e];
+      })
+      .filter((e) => !!e);
+    let headerMenuForAdd = Object.keys(req.body)
+      .map((e) => {
+        if (e.match(/headerMenu$/)) return req.body[e];
+      })
+      .filter((e) => !!e)
+      .flat();
+
+    if (req.files.headerLogo) {
+      try {
+        connection = await newConnectionFactory(pool, res);
+        await modifyQueryFactory(
+          connection,
+          `
+          update images set url=?
+      ;`,
+          [req.files.headerLogo[0].originalname]
+        );
+      } catch (error) {
+        reportServerError(error, res);
+      } finally {
+        if (connection) connection.release();
+      }
+    }
+    try {
+      connection = await newConnectionFactory(pool, res);
+      for (let i = 0; i < headerMenu.length; i++) {
+        await modifyQueryFactory(
+          connection,
+          `
+        update lists set name=? where id=?
+        ;`,
+          [headerMenu[i], i + 1]
+        );
+      }
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+
+    try {
+      connection = await newConnectionFactory(pool, res);
+      if (headerMenuForAdd.length > 0) {
+        let i = 0;
+        while (i < headerMenuForAdd.length) {
+          console.log(60, i);
+          await modifyQueryFactory(
+            connection,
+            `
+                insert into lists(code,name) 
+                values (?,?)
+            ;`,
+            ['menu', headerMenuForAdd[i]]
+          );
+          i++;
+        }
+      }
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+
+    try {
+      connection = await newConnectionFactory(pool, res);
+      await modifyQueryFactory(
+        connection,
+        `
+      update content_page set contact=?
+      ;`,
+        [req.body.headerContact]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+  }
+);
+
+webserver.post('/deleteHeaderMenu', async (req, res) => {
+  console.log('deleteHeaderMenu req.body', req.body);
+  try {
+    connection = await newConnectionFactory(pool, res);
+    for (let i = 0; i < headerMenu.length; i++) {
+      await modifyQueryFactory(
+        connection,
+        `
+      delete from lists set name=? where id=?
+      ;`,
+        [headerMenu[i], i + 1]
+      );
+    }
   } catch (error) {
     reportServerError(error, res);
   } finally {
     if (connection) connection.release();
   }
-});
 
-webserver.get('/admin', async (req, res) => {
-  console.log(123, dataMain);
-  res.render('pages/admin', {
-    data: dataMain,
-  });
+  res.end();
 });
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));

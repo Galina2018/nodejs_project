@@ -19,7 +19,7 @@
         <li><a href="#about">Обо мне</a></li>
         <li><a href="#services">Услуги</a></li>
         <li><a href="#blog">Блог</a></li>
-    </ul>
+      </ul>
     </nav>
   </header>
 
@@ -27,22 +27,25 @@
     <!-- Menu Section -->
     <section class="admin-section" id="header">
       <h2>Редактирование раздела "<%= data[0].menu[0] %>"</h2>
-      <form id="headerForm">
+      <form id="headerForm" enctype="multipart/form-data">
         <label for="headerLogo">Логотип</label>
-        <input type="file" id="headerLogo" name="headerLogo" accept=".png,.jpg,.jpeg" value="" required>
+        <input type="file" id="headerLogo" name="headerLogo" accept=".jpg,.jpeg" value="<%=data[0].logo %>">
 
         <label for="headerMenu">Пункты меню</label>
-        <menu id="headerMenu" name="headerMenu" required>
-          <% for(var i=0; i < data[0].menu.length;i++) {%>
-            <li>
-              <input value="<%=data[0].menu[i] %>"
-              >
-            </li>
+        <div class="menu">
+          <menu id="headerMenu" name="headerMenu" required>
+            <% for(var i=0; i < data[0].menu.length;i++) {%>
+              <li id="menu<%=i%>">
+                <input value="<%=data[0].menu[i] %>" name="headerMenu<%=i%>">
+                <button type='button' onclick="deleteHeaderMenu({arr:'<%= data[0].menu %>', idx:'<%=i %>'})">Удалить</button>
+              </li>
               <%} %>
-        </menu>
+          </menu>
+          <button type='button' onclick="addHeaderMenu()">Добавить пункт меню</button>
+        </div>
 
-        <label for="aboutImage">Контакт (моб. телефон)</label>
-        <input type="text" id="aboutImage" name="aboutImage" value="" required>
+        <label for="headerContact">Контакт (моб. телефон)</label>
+        <input type="text" id="headerContact" name="headerContact" value="<%=data[0].contact %>" required>
 
         <button type="submit">Сохранить</button>
       </form>
@@ -105,7 +108,6 @@
       </div>
     </section>
   </div>
-
 </body>
-
 </html>
+<script src="./script.js"></script>
