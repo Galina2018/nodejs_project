@@ -12,18 +12,22 @@ const {
   getLastInsertedId,
   getModifiedRowsCount,
 } = require('./db_utils');
+const res = require('express/lib/response');
 
 const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  password: '1234',
+  // password: '1234',
+  password: '',
   database: 'project_db',
 };
-let pool = mysql.createPool(poolConfig);
+// let pool = mysql.createPool(poolConfig);
+const pool = mysql.createPool(poolConfig);
 
 const webserver = express();
 webserver.set('view engine', 'ejs');
+webserver.set('view cache', false);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -54,7 +58,7 @@ async function getDataMainPage() {
   let dataMain;
   let connection = null;
   try {
-    connection = await newConnectionFactory(pool, (res = {}));
+    connection = await newConnectionFactory(pool, res);
     let result = await selectQueryFactory(
       connection,
       'select content from indpages',
@@ -77,7 +81,7 @@ async function getDataMainPage() {
     let logo = await selectQueryFactory(
       connection,
       'select url from images where code=?',
-      [JSON.parse(dataMain[0].logo).image]
+      ['logo']
     );
     logo = logo.map((row) => ({
       url: row.url,
@@ -113,12 +117,13 @@ webserver.get('/main', async (req, res) => {
 webserver.get('/admin', async (req, res) => {
   let data;
   try {
+    console.log('in /admin****');
     data = await getDataMainPage();
+    console.log('data in admin', data);
     res.render('pages/admin', { data });
   } catch (error) {
     reportServerError(error, res);
   }
-  // console.log('data in admin', data);
 });
 
 webserver.post(
@@ -136,7 +141,6 @@ webserver.post(
       })
       .filter((e) => !!e)
       .flat();
-
     if (req.files.headerLogo) {
       try {
         connection = await newConnectionFactory(pool, res);
@@ -153,14 +157,17 @@ webserver.post(
         if (connection) connection.release();
       }
     }
+
     try {
       connection = await newConnectionFactory(pool, res);
       for (let i = 0; i < headerMenu.length; i++) {
+        console.log('headerMenu[i], i + 1', headerMenu[i], i + 1);
         await modifyQueryFactory(
           connection,
           `
-        update lists set name=? where id=?
-        ;`,
+                update lists set name=?
+                where code='menu' and order_name=?
+            ;`,
           [headerMenu[i], i + 1]
         );
       }
@@ -179,10 +186,10 @@ webserver.post(
           await modifyQueryFactory(
             connection,
             `
-                insert into lists(code,name) 
-                values (?,?)
+                insert into lists(code,order_name,name)
+                values (?,?,?)
             ;`,
-            ['menu', headerMenuForAdd[i]]
+            ['menu', headerMenu.length+1, headerMenuForAdd[i]]
           );
           i++;
         }
@@ -207,22 +214,33 @@ webserver.post(
     } finally {
       if (connection) connection.release();
     }
+
+    // try {
+    //   connection = await newConnectionFactory(pool, res);
+    //   const data = await getDataMainPage();
+    //   res.render('pages/admin', { data });
+    // } catch (error) {
+    //   reportServerError(error, res);
+    // } finally {
+    //   if (connection) connection.release();
+    // }
+    res.send('ok')
   }
 );
 
 webserver.post('/deleteHeaderMenu', async (req, res) => {
-  console.log('deleteHeaderMenu req.body', req.body);
   try {
     connection = await newConnectionFactory(pool, res);
-    for (let i = 0; i < headerMenu.length; i++) {
-      await modifyQueryFactory(
-        connection,
-        `
-      delete from lists set name=? where id=?
+    const { arrMenu, index } = req.body;
+    const headerMenuName = arrMenu[index];
+    console.log('headerMenuName', headerMenuName);
+    await modifyQueryFactory(
+      connection,
+      `
+      delete from lists where name=? limit 1
       ;`,
-        [headerMenu[i], i + 1]
-      );
-    }
+      [headerMenuName]
+    );
   } catch (error) {
     reportServerError(error, res);
   } finally {
