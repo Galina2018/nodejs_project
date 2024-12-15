@@ -1,5 +1,7 @@
 const headerForm = document.getElementById('headerForm');
-headerForm.addEventListener('submit', addHeaderChange);
+headerForm.addEventListener('submit', saveHeaderChange);
+const aboutForm = document.getElementById('aboutForm');
+aboutForm.addEventListener('submit', saveAboutChange);
 
 async function addHeaderMenu({idx}) {
   let headerMenu = document.getElementById('headerMenu');
@@ -7,7 +9,7 @@ async function addHeaderMenu({idx}) {
   <button type="button" onclick="deleteHeaderMenu({arr:'<%= data[0].menu %>', idx:'<%=i %>'})"
 >Удалить</button></li>`;
   const last = document.querySelector('menu > li:last-child input');
-  last.value = ''
+  // last.value = ''
   const btn = document.querySelector('menu ~ button');
   if (!last.value) {
     btn.disabled = true;
@@ -30,11 +32,19 @@ async function deleteHeaderMenu({ arr, idx }) {
   });
 }
 
-async function addHeaderChange(evt) {
+async function saveHeaderChange(evt) {
   evt.preventDefault();
-  await fetch('/addHeaderChange', {
+  await fetch('/saveHeaderChange', {
     method: 'POST',
     body: new FormData(headerForm),
+  });
+}
+async function saveAboutChange(evt) {
+  evt.preventDefault();
+  console.log('in script saveAboutChange')
+  await fetch('/saveAboutChange', {
+    method: 'POST',
+    body: new FormData(aboutForm),
   });
 }
 

@@ -19,7 +19,7 @@ header {
 }
 
 header .logo img {
-  max-width: 100px;
+  max-width: 70px;
 }
 
 header nav ul {
@@ -77,9 +77,18 @@ section .menu button.disabled {
 }
 
 .about img {
-  width: 300px;
+  width: 200px;
   height: 200px;
   object-fit: cover;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.row p {
+  margin-left: 5px;
 }
 
 .about .text {
