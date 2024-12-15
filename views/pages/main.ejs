@@ -1,82 +1,73 @@
 <!DOCTYPE html>
 <html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <link rel="stylesheet" href="main.css">
-</head>
-
-<body>
-  <!-- Header Section -->
-  <header class="header">
-    <div>
-      <img src=<%=data[0].logo %> width="150px" alt="Логотип">
-    </div>
-    <nav class="menu">
-      <ul>
-        <% for(var i=0; i < data[0].menu.length; i++) {%>
-          <li>
-            <%= data[0].menu[i] %>
-          </li>
+  <body>
+    <!-- Header Section -->
+    <header class="header">
+      <div><img src="<%=data[0].logo %>" width="70px" alt="Логотип" /></div>
+      <nav class="menu">
+        <ul>
+          <% for(var i=0; i < data[0].menu.length; i++) {%>
+          <li><%= data[0].menu[i] %></li>
           <%} %>
-      </ul>
-    </nav>
-    <div class="phone">
-      <p>Телефон: <%= data[0].contact %>
-      </p>
-    </div>
-  </header>
-
-  <!-- About Section -->
-  <section class="about" id="about">
-    <div class="about-content">
-      <img src="about.jpg" alt="Обо мне">
-      <div class="text">
-        <h2>Обо мне</h2>
-        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Provident earum a veniam nobis recusandae
-          doloremque quas! Repellendus reiciendis cum sint, repellat eaque impedit officia assumenda vel fugiat ea
-          excepturi dolorum.</p>
-        <button>Подробнее</button>
+        </ul>
+      </nav>
+      <div class="phone">
+        <p>Телефон: <%= data[0].contact %></p>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Services Section -->
-  <section class="services" id="services">
-    <h2>Мои услуги</h2>
-    <div class="service">
-      <img src="service1.jpg" alt="Услуга 1">
-      <p>Услуга 1: Описание услуги.</p>
-    </div>
-    <div class="service">
-      <img src="service2.jpg" alt="Услуга 2">
-      <p>Услуга 2: Описание услуги.</p>
-    </div>
-    <div class="service">
-      <img src="service3.jpg" alt="Услуга 3">
-      <p>Услуга 3: Описание услуги.</p>
-    </div>
-  </section>
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="about-content">
+        <img src="<%=data[0].foto %>" alt="Обо мне" />
+        <div class="text">
+          <h2><%= data[0].aboutTitle %></h2>
+          <p><%= data[0].aboutText %></p>
+          <button>Подробнее</button>
+        </div>
+      </div>
+    </section>
 
-  <!-- Blog Section -->
-  <section class="blog" id="blog">
-    <h2>Мои статьи</h2>
-    <div class="article">
-      <img src="article1.jpg" alt="Статья 1">
-      <p>Статья 1: Введение в тему.</p>
-    </div>
-    <div class="article">
-      <img src="article2.jpg" alt="Статья 2">
-      <p>Статья 2: Как сделать X?</p>
-    </div>
-    <div class="article">
-      <img src="article3.jpg" alt="Статья 3">
-      <p>Статья 3: Советы по Y.</p>
-    </div>
-  </section>
-</body>
+    <!-- Services Section -->
+    <section class="services" id="services">
+      <h2>Мои услуги</h2>
+      <div class="service">
+        <img src="service1.jpg" alt="Услуга 1" />
+        <p>Услуга 1: Описание услуги.</p>
+      </div>
+      <div class="service">
+        <img src="service2.jpg" alt="Услуга 2" />
+        <p>Услуга 2: Описание услуги.</p>
+      </div>
+      <div class="service">
+        <img src="service3.jpg" alt="Услуга 3" />
+        <p>Услуга 3: Описание услуги.</p>
+      </div>
+    </section>
 
+    <!-- Blog Section -->
+    <section class="blog" id="blog">
+      <h2>Мои статьи</h2>
+      <div class="article">
+        <img src="article1.jpg" alt="Статья 1" />
+        <p>Статья 1: Введение в тему.</p>
+      </div>
+      <div class="article">
+        <img src="article2.jpg" alt="Статья 2" />
+        <p>Статья 2: Как сделать X?</p>
+      </div>
+      <div class="article">
+        <img src="article3.jpg" alt="Статья 3" />
+        <p>Статья 3: Советы по Y.</p>
+      </div>
+    </section>
+  </body>
 </html>
 <script src="./script.js"></script>

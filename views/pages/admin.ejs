@@ -24,7 +24,7 @@
     <div class="admin-content">
       <!-- Menu Section -->
       <section class="admin-section" id="header">
-        <h2>Редактирование раздела "<%= data[0].menu[0] %>"</h2>
+        <h2>Редактирование раздела "Шапка"</h2>
         <form id="headerForm" enctype="multipart/form-data">
           <label for="headerLogo">Логотип</label>
           <input
@@ -73,28 +73,30 @@
       <!-- About Section -->
       <section class="admin-section" id="about">
         <h2>Редактирование раздела "Обо мне"</h2>
-        <form id="aboutForm">
+        <form id="aboutForm" enctype="multipart/form-data">
           <label for="aboutTitle">Заголовок</label>
           <input
             type="text"
             id="aboutTitle"
             name="aboutTitle"
-            value="Обо мне"
+            value="<%= data[0].aboutTitle%>"
             required
           />
 
           <label for="aboutText">Текст</label>
-          <textarea id="aboutText" name="aboutText" rows="4" required>
-описание</textarea
+          <textarea id="aboutText" name="aboutText" required>
+<%= data[0].aboutText%></textarea
           >
-
-          <label for="aboutImage">Изображение (URL)</label>
+          <div class="row">
+            <label for="aboutFoto">Изображение (URL)</label>
+            <p id="aboutImage" name="aboutImage"><%= data[0].foto%></p>
+          </div>
           <input
-            type="text"
-            id="aboutImage"
-            name="aboutImage"
-            value="about.jpg"
-            required
+            type="file"
+            id="aboutFoto"
+            name="aboutFoto"
+            accept=".jpg,.jpeg"
+            value="<%=data[0].foto %>"
           />
 
           <button type="submit">Сохранить</button>

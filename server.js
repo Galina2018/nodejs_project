@@ -22,12 +22,11 @@ const poolConfig = {
   password: '',
   database: 'project_db',
 };
-// let pool = mysql.createPool(poolConfig);
 const pool = mysql.createPool(poolConfig);
 
 const webserver = express();
 webserver.set('view engine', 'ejs');
-webserver.set('view cache', false);
+// webserver.set('view cache', false);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -50,13 +49,16 @@ webserver.use(bodyParser.json({}));
 webserver.use(express.urlencoded({ extended: true }));
 webserver.use(express.static(path.resolve(__dirname, 'public')));
 
+let dataMain;
+let connection = null;
+
 function reportServerError(error) {
-  // res.status(500).end();
+  res.status(500).end();
   logLineAsync(logFN, `[${port}] ` + error);
 }
 async function getDataMainPage() {
-  let dataMain;
-  let connection = null;
+  // let dataMain;
+  // let connection = null;
   try {
     connection = await newConnectionFactory(pool, res);
     let result = await selectQueryFactory(
@@ -72,28 +74,48 @@ async function getDataMainPage() {
     );
     dataMain = dataMain.map((row) => ({
       logo: row.logo,
+      menu: row.menu,
       contact: row.contact,
       foto: row.foto,
-      motivation: row.motivation,
+      aboutTitle: row.about_title,
+      aboutText: row.about_text,
       services: row.services,
       articles: row.articles,
     }));
     let logo = await selectQueryFactory(
       connection,
       'select url from images where code=?',
-      ['logo']
+      [dataMain[0].logo]
     );
     logo = logo.map((row) => ({
       url: row.url,
     }));
     dataMain[0].logo = logo[0].url;
+    let foto = await selectQueryFactory(
+      connection,
+      'select url from images where code=?',
+      [dataMain[0].foto]
+    );
+    foto = foto.map((row) => ({
+      url: row.url,
+    }));
+    dataMain[0].foto = foto[0].url;
+
     let menuMain = await selectQueryFactory(
       connection,
       'select * from lists where code=?',
-      ['menu']
+      [dataMain[0].menu]
     );
     menuMain = menuMain.map((row) => row.name);
     dataMain[0].menu = menuMain;
+
+    let services = await selectQueryFactory(
+      connection,
+      'select * from lists where code=?',
+      [dataMain[0].services]
+    );
+    services = services.map((row) => row.name);
+    dataMain[0].services = services;
     // console.log('data in func', dataMain);
     return dataMain;
   } catch (error) {
@@ -111,13 +133,11 @@ webserver.get('/main', async (req, res) => {
   } catch (error) {
     reportServerError(error, res);
   }
-  // console.log('data in main', data);
 });
 
 webserver.get('/admin', async (req, res) => {
   let data;
   try {
-    console.log('in /admin****');
     data = await getDataMainPage();
     console.log('data in admin', data);
     res.render('pages/admin', { data });
@@ -127,7 +147,7 @@ webserver.get('/admin', async (req, res) => {
 });
 
 webserver.post(
-  '/addHeaderChange',
+  '/saveHeaderChange',
   upload.fields([{ name: 'headerLogo', maxCount: 1 }]),
   async (req, res) => {
     let headerMenu = Object.keys(req.body)
@@ -141,13 +161,14 @@ webserver.post(
       })
       .filter((e) => !!e)
       .flat();
+
     if (req.files.headerLogo) {
       try {
         connection = await newConnectionFactory(pool, res);
         await modifyQueryFactory(
           connection,
           `
-          update images set url=?
+          update images set url=? where code='logo'
       ;`,
           [req.files.headerLogo[0].originalname]
         );
@@ -161,7 +182,6 @@ webserver.post(
     try {
       connection = await newConnectionFactory(pool, res);
       for (let i = 0; i < headerMenu.length; i++) {
-        console.log('headerMenu[i], i + 1', headerMenu[i], i + 1);
         await modifyQueryFactory(
           connection,
           `
@@ -182,14 +202,13 @@ webserver.post(
       if (headerMenuForAdd.length > 0) {
         let i = 0;
         while (i < headerMenuForAdd.length) {
-          console.log(60, i);
           await modifyQueryFactory(
             connection,
             `
                 insert into lists(code,order_name,name)
                 values (?,?,?)
             ;`,
-            ['menu', headerMenu.length+1, headerMenuForAdd[i]]
+            ['menu', headerMenu.length + 1, headerMenuForAdd[i]]
           );
           i++;
         }
@@ -224,7 +243,7 @@ webserver.post(
     // } finally {
     //   if (connection) connection.release();
     // }
-    res.send('ok')
+    res.send('ok');
   }
 );
 
@@ -233,7 +252,6 @@ webserver.post('/deleteHeaderMenu', async (req, res) => {
     connection = await newConnectionFactory(pool, res);
     const { arrMenu, index } = req.body;
     const headerMenuName = arrMenu[index];
-    console.log('headerMenuName', headerMenuName);
     await modifyQueryFactory(
       connection,
       `
@@ -247,7 +265,45 @@ webserver.post('/deleteHeaderMenu', async (req, res) => {
     if (connection) connection.release();
   }
 
-  res.end();
+  res.send('ok');
 });
+
+webserver.post(
+  '/saveAboutChange',
+  upload.fields([{ name: 'aboutFoto', maxCount: 1 }]),
+  async (req, res) => {
+    if (req.files.aboutFoto) {
+      try {
+        connection = await newConnectionFactory(pool, res);
+        await modifyQueryFactory(
+          connection,
+          `
+      update images set url=? where code='foto'
+  ;`,
+          [req.files.aboutFoto[0].originalname]
+        );
+      } catch (error) {
+        reportServerError(error, res);
+      } finally {
+        if (connection) connection.release();
+      }
+    }
+
+    try {
+      connection = await newConnectionFactory(pool, res);
+      await modifyQueryFactory(
+        connection,
+        `
+      update content_page set about_title=?, about_text=? where content='10'
+  ;`,
+        [req.body.aboutTitle, req.body.aboutText]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+  }
+);
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));
