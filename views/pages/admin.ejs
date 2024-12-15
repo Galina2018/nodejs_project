@@ -32,7 +32,7 @@
             id="headerLogo"
             name="headerLogo"
             accept=".jpg,.jpeg"
-            value="<%=data[0].logo %>"
+            value="<%=dataHeader[0].image %>"
           />
           <div>
             <label for="headerMenu">Пункты меню</label>
@@ -40,12 +40,15 @@
           </div>
           <div class="menu">
             <menu id="headerMenu" name="headerMenu" required>
-              <% for(var i=0; i < data[0].menu.length;i++) {%>
+              <% for(var i=0; i < dataHeader[0].list.length;i++) {%>
               <li id="menu<%=i%>">
-                <input value="<%=data[0].menu[i] %>" name="headerMenu<%=i%>" />
+                <input
+                  value="<%=dataHeader[0].list[i] %>"
+                  name="headerMenu<%=i%>"
+                />
                 <button
                   type="button"
-                  onclick="deleteHeaderMenu({arr:'<%= data[0].menu %>', idx:'<%=i %>'})"
+                  onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
                 >
                   Удалить
                 </button>
@@ -56,16 +59,14 @@
               Добавить пункт меню
             </button>
           </div>
-
           <label for="headerContact">Контакт (моб. телефон)</label>
           <input
             type="text"
             id="headerContact"
             name="headerContact"
-            value="<%=data[0].contact %>"
+            value="<%=dataHeader[0].text %>"
             required
           />
-
           <button type="submit">Сохранить</button>
         </form>
       </section>
@@ -79,24 +80,24 @@
             type="text"
             id="aboutTitle"
             name="aboutTitle"
-            value="<%= data[0].aboutTitle%>"
+            value="<%= dataAbout[0].name%>"
             required
           />
 
           <label for="aboutText">Текст</label>
-          <textarea id="aboutText" name="aboutText" required>
-<%= data[0].aboutText%></textarea
+          <textarea id="aboutText" name="aboutText" rows="5" required>
+                <%= dataAbout[0].text%></textarea
           >
           <div class="row">
             <label for="aboutFoto">Изображение (URL)</label>
-            <p id="aboutImage" name="aboutImage"><%= data[0].foto%></p>
+            <p id="aboutImage" name="aboutImage"><%= dataAbout[0].image%></p>
           </div>
           <input
             type="file"
             id="aboutFoto"
             name="aboutFoto"
             accept=".jpg,.jpeg"
-            value="<%=data[0].foto %>"
+            value="<%=dataAbout[0].image %>"
           />
 
           <button type="submit">Сохранить</button>
@@ -107,8 +108,8 @@
       <section class="admin-section" id="services">
         <h2>Редактирование раздела "Услуги"</h2>
         <div class="service-item">
-          <h3>Услуга 1</h3>
           <form id="serviceForm1">
+            <h3>Услуга 1</h3>
             <label for="serviceTitle1">Заголовок</label>
             <input
               type="text"

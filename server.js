@@ -50,10 +50,11 @@ webserver.use(express.urlencoded({ extended: true }));
 webserver.use(express.static(path.resolve(__dirname, 'public')));
 
 let dataMain;
+let dataHeader;
 let connection = null;
 
 function reportServerError(error) {
-  res.status(500).end();
+  // res.status(500).end();
   logLineAsync(logFN, `[${port}] ` + error);
 }
 async function getDataMainPage() {
@@ -67,57 +68,80 @@ async function getDataMainPage() {
       []
     );
     result = result.map((row) => row.content);
-    dataMain = await selectQueryFactory(
+
+    let dataHeader = await selectQueryFactory(
       connection,
-      'select * from content_page where content=?',
+      'select * from indsection where content=?',
       [result[0]]
     );
-    dataMain = dataMain.map((row) => ({
-      logo: row.logo,
-      menu: row.menu,
-      contact: row.contact,
-      foto: row.foto,
-      aboutTitle: row.about_title,
-      aboutText: row.about_text,
-      services: row.services,
-      articles: row.articles,
+
+    dataHeader = dataHeader.map((row) => ({
+      image: row.image,
+      list: row.list,
+      text: row.text,
     }));
+
     let logo = await selectQueryFactory(
       connection,
       'select url from images where code=?',
-      [dataMain[0].logo]
+      [dataHeader[0].image]
     );
     logo = logo.map((row) => ({
       url: row.url,
     }));
-    dataMain[0].logo = logo[0].url;
-    let foto = await selectQueryFactory(
+    dataHeader[0].image = logo[0].url;
+
+    let menuHeader = await selectQueryFactory(
       connection,
-      'select url from images where code=?',
-      [dataMain[0].foto]
+      'select name from lists where code=?',
+      [dataHeader[0].list]
     );
-    foto = foto.map((row) => ({
-      url: row.url,
+    menuHeader = menuHeader.map((row) => row.name);
+    dataHeader[0].list = menuHeader;
+
+    console.log('dataHeader**', dataHeader);
+
+    let dataAbout = await selectQueryFactory(
+      connection,
+      'select name, text, image from group_section where content=? and code=?',
+      [10, 'about']
+    );
+    dataAbout = dataAbout.map((row) => ({
+      name: row.name,
+      text: row.text,
+      image: row.image,
     }));
-    dataMain[0].foto = foto[0].url;
+    console.log('dataAbout**', dataAbout)
 
-    let menuMain = await selectQueryFactory(
-      connection,
-      'select * from lists where code=?',
-      [dataMain[0].menu]
-    );
-    menuMain = menuMain.map((row) => row.name);
-    dataMain[0].menu = menuMain;
+    // aboutSection = aboutSection.map((row) => ({
+    //   name: row.name,
+    //   text: row.text,
+    //   image: row.image,
+    // }));
+    // dataMain[0].aboutSection = aboutSection;
 
-    let services = await selectQueryFactory(
-      connection,
-      'select * from lists where code=?',
-      [dataMain[0].services]
-    );
-    services = services.map((row) => row.name);
-    dataMain[0].services = services;
+    // console.log('dataMain***', dataMain)
+
+    // let foto = await selectQueryFactory(
+    //   connection,
+    //   'select url from images where code=?',
+    //   [dataMain[0].foto]
+    // );
+    // foto = foto.map((row) => ({
+    //   url: row.url,
+    // }));
+    // dataMain[0].foto = foto[0].url;
+
+    // let services = await selectQueryFactory(
+    //   connection,
+    //   'select * from lists where code=?',
+    //   [dataMain[0].services]
+    // );
+    // services = services.map((row) => row.name);
+    // dataMain[0].services = services;
     // console.log('data in func', dataMain);
-    return dataMain;
+    // return dataMain;
+    return {dataHeader, dataAbout};
   } catch (error) {
     reportServerError(error);
   } finally {
@@ -136,11 +160,13 @@ webserver.get('/main', async (req, res) => {
 });
 
 webserver.get('/admin', async (req, res) => {
-  let data;
   try {
-    data = await getDataMainPage();
+    let data = await getDataMainPage();
     console.log('data in admin', data);
-    res.render('pages/admin', { data });
+    const {dataHeader, dataAbout} = data;
+    console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
+    // res.render('pages/admin', { dataHeader, dataAbout });
+    res.render('pages/admin', { dataHeader, dataAbout });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -224,7 +250,7 @@ webserver.post(
       await modifyQueryFactory(
         connection,
         `
-      update content_page set contact=?
+      update indsection set text=?
       ;`,
         [req.body.headerContact]
       );
@@ -233,16 +259,6 @@ webserver.post(
     } finally {
       if (connection) connection.release();
     }
-
-    // try {
-    //   connection = await newConnectionFactory(pool, res);
-    //   const data = await getDataMainPage();
-    //   res.render('pages/admin', { data });
-    // } catch (error) {
-    //   reportServerError(error, res);
-    // } finally {
-    //   if (connection) connection.release();
-    // }
     res.send('ok');
   }
 );
@@ -303,7 +319,31 @@ webserver.post(
     } finally {
       if (connection) connection.release();
     }
+    res.send('ok');
   }
 );
+
+// webserver.post(
+//   '/saveService1Change',
+//   upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
+//   async (req, res) => {
+//     if (req.files.serviceImage1) {
+//       try {
+//         connection = await newConnectionFactory(pool, res);
+//         await modifyQueryFactory(
+//           connection,
+//           `
+//       update images set url=? where code='foto'
+//   ;`,
+//           [req.files.serviceImage1[0].originalname]
+//         );
+//       } catch (error) {
+//         reportServerError(error, res);
+//       } finally {
+//         if (connection) connection.release();
+//       }
+//     }
+//   }
+// );
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));
