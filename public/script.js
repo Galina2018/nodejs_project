@@ -2,14 +2,16 @@ const headerForm = document.getElementById('headerForm');
 headerForm.addEventListener('submit', saveHeaderChange);
 const aboutForm = document.getElementById('aboutForm');
 aboutForm.addEventListener('submit', saveAboutChange);
+// const serviceForm1 = document.getElementById('abouserviceForm1tForm');
+// serviceForm1.addEventListener('submit', saveService1Change);
 
 async function addHeaderMenu({idx}) {
   let headerMenu = document.getElementById('headerMenu');
   headerMenu.innerHTML += `<li id=menu><input value='' name="headerMenu" />
-  <button type="button" onclick="deleteHeaderMenu({arr:'<%= data[0].menu %>', idx:'<%=i %>'})"
+  <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
 >Удалить</button></li>`;
   const last = document.querySelector('menu > li:last-child input');
-  // last.value = ''
+  last.value = ''
   const btn = document.querySelector('menu ~ button');
   if (!last.value) {
     btn.disabled = true;
@@ -18,7 +20,7 @@ async function addHeaderMenu({idx}) {
 }
 
 async function deleteHeaderMenu({ arr, idx }) {
-  console.log('***in deleteHeaderMenu *****');
+  console.log('***in deleteHeaderMenu *****', arr, idx);
   let arrMenu = arr.split(',');
   let idxItemMenu = `menu${idx}`;
   let liForDel = document.getElementById(idxItemMenu);
@@ -41,12 +43,20 @@ async function saveHeaderChange(evt) {
 }
 async function saveAboutChange(evt) {
   evt.preventDefault();
-  console.log('in script saveAboutChange')
   await fetch('/saveAboutChange', {
     method: 'POST',
     body: new FormData(aboutForm),
   });
 }
+
+// async function saveService1Change(evt) {
+//   evt.preventDefault();
+//   console.log('in script saveService1Change')
+//   await fetch('/saveService1Change', {
+//     method: 'POST',
+//     body: new FormData(serviceForm1),
+//   });
+// }
 
 async function reloadHeaderMenu() {
   console.log('=in reloadHeaderMenu')
@@ -60,7 +70,7 @@ async function reloadHeaderMenu() {
   const lastInputMemory = lastInput.value
   lastLi.remove();
   headerMenu.innerHTML += `<li id='menu${idx}'><input value=${lastInputMemory} name='headerMenu${idx}' />
-  <button type="button" onclick="deleteHeaderMenu({arr:'<%= data[0].menu %>', idx:${idx}})"
+  <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:${idx}})"
   >Удалить</button></li>`;
   const btnAdd = document.querySelector('menu ~ button');
   if (lastInput.value) {
