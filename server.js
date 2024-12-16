@@ -98,8 +98,6 @@ async function getDataMainPage() {
     menuHeader = menuHeader.map((row) => row.name);
     dataHeader[0].list = menuHeader;
 
-    console.log('dataHeader**', dataHeader);
-
     let dataAbout = await selectQueryFactory(
       connection,
       'select name, text, image from group_section where content=? and code=?',
@@ -110,7 +108,6 @@ async function getDataMainPage() {
       text: row.text,
       image: row.image,
     }));
-    console.log('dataAbout**', dataAbout);
 
     let foto = await selectQueryFactory(
       connection,
@@ -122,17 +119,31 @@ async function getDataMainPage() {
     }));
     dataAbout[0].image = foto[0].url;
 
-    // let services = await selectQueryFactory(
-    //   connection,
-    //   'select * from lists where code=?',
-    //   [dataMain[0].services]
-    // );
-    // services = services.map((row) => row.name);
-    // dataMain[0].services = services;
-    // console.log('data in func', dataMain);
-    // return dataMain;
-    console.log(111, dataHeader, dataAbout);
-    return { dataHeader, dataAbout };
+    let dataServices = await selectQueryFactory(
+      connection,
+      `select name, text, image from group_section where content=10 and code='services'`,
+      []
+    );
+    dataServices = dataServices.map((row) => ({
+      name: row.name,
+      text: row.text,
+      image: row.image,
+    }));
+
+    let images = await selectQueryFactory(
+      connection,
+      `select code, url from images `,
+      []
+    );
+    images = images.map((row) => ({ code: row.code, url: row.url }));
+    dataServices = dataServices.map((e) => {
+      const el = images.find((img) => img.code === e.image);
+      if (el) {
+        e.image = el.url;
+      } else e.image = '';
+      return e;
+    });
+    return { dataHeader, dataAbout, dataServices };
   } catch (error) {
     reportServerError(error, res);
   } finally {
@@ -143,8 +154,8 @@ async function getDataMainPage() {
 webserver.get('/main', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout } = data;
-    res.render('pages/main', { dataHeader, dataAbout });
+    const { dataHeader, dataAbout, dataServices } = data;
+    res.render('pages/main', { dataHeader, dataAbout, dataServices });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -153,11 +164,10 @@ webserver.get('/main', async (req, res) => {
 webserver.get('/admin', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    // console.log('data in admin', data);
-    const { dataHeader, dataAbout } = data;
-    console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
-    // res.render('pages/admin', { dataHeader, dataAbout });
-    res.render('pages/admin', { dataHeader, dataAbout });
+    const { dataHeader, dataAbout, dataServices } = data;
+    // console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
+    // console.log('dataServices in admin', dataServices);
+    res.render('pages/admin', { dataHeader, dataAbout, dataServices });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -296,6 +306,39 @@ webserver.post(
             update group_section set name=?, text=? where content='10' and code='about'
         ;`,
         [req.body.aboutTitle, req.body.aboutText]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+    res.send('ok');
+  }
+);
+
+webserver.post(
+  '/saveServiceChange/:1',
+  upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      connection = await newConnectionFactory(pool, res);
+      console.log('/saveServiceChange/:1*', req.body);
+      console.log('/saveServiceChange/:1**', req.files.serviceImage1);
+      if (req.files.serviceImage1) {
+        await modifyQueryFactory(
+          connection,
+          `
+      update images set url=? where code='indconsult'
+  ;`,
+          [req.files.serviceImage1[0].originalname]
+        );
+      }
+      await modifyQueryFactory(
+        connection,
+        `
+            update group_section set name=?, text=? where content='10' and code='service' and code_order = 1
+        ;`,
+        [req.body.serviceTitle1, req.body.serviceText1]
       );
     } catch (error) {
       reportServerError(error, res);

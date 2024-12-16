@@ -2,21 +2,21 @@ const headerForm = document.getElementById('headerForm');
 headerForm.addEventListener('submit', saveHeaderChange);
 const aboutForm = document.getElementById('aboutForm');
 aboutForm.addEventListener('submit', saveAboutChange);
-// const serviceForm1 = document.getElementById('abouserviceForm1tForm');
-// serviceForm1.addEventListener('submit', saveService1Change);
+const serviceForm = document.getElementById('serviceForm');
+serviceForm.addEventListener('submit', saveServiceChange);
 
-async function addHeaderMenu({idx}) {
+async function addHeaderMenu({ idx }) {
   let headerMenu = document.getElementById('headerMenu');
   headerMenu.innerHTML += `<li id=menu><input value='' name="headerMenu" />
   <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
 >Удалить</button></li>`;
   const last = document.querySelector('menu > li:last-child input');
-  last.value = ''
+  last.value = '';
   const btn = document.querySelector('menu ~ button');
   if (!last.value) {
     btn.disabled = true;
     btn.className = 'disabled';
-  } 
+  }
 }
 
 async function deleteHeaderMenu({ arr, idx }) {
@@ -48,6 +48,23 @@ async function saveAboutChange(evt) {
     body: new FormData(aboutForm),
   });
 }
+async function saveServiceChange(evt) {
+  evt.preventDefault();
+  const serviceNumber = evt.submitter.name.slice(-1);
+  let data = Array.from(new FormData(serviceForm));
+  let rgxp = new RegExp(serviceNumber);
+  data = data.filter(([key, val]) => !!key.match(rgxp));
+  const dataService = new FormData();
+  data.forEach((e) => {
+    dataService.append(e[0], e[1]);
+  });
+  dataService.append('serviceNumber', serviceNumber);
+
+  await fetch('/saveServiceChange/:serviceNumber', {
+    method: 'POST',
+    body: dataService,
+  });
+}
 
 // async function saveService1Change(evt) {
 //   evt.preventDefault();
@@ -59,15 +76,15 @@ async function saveAboutChange(evt) {
 // }
 
 async function reloadHeaderMenu() {
-  console.log('=in reloadHeaderMenu')
+  console.log('=in reloadHeaderMenu');
   await fetch('/admin', {
-    method:"GET"
-  })
+    method: 'GET',
+  });
   const lastLi = document.querySelector('menu > li:last-child');
   const lastInput = document.querySelector('menu > li:last-child input');
   const lastIindex = document.querySelectorAll('menu > li');
-  const idx = lastIindex.length-1;
-  const lastInputMemory = lastInput.value
+  const idx = lastIindex.length - 1;
+  const lastInputMemory = lastInput.value;
   lastLi.remove();
   headerMenu.innerHTML += `<li id='menu${idx}'><input value=${lastInputMemory} name='headerMenu${idx}' />
   <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:${idx}})"
