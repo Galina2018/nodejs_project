@@ -98,8 +98,6 @@ async function getDataMainPage() {
     menuHeader = menuHeader.map((row) => row.name);
     dataHeader[0].list = menuHeader;
 
-    console.log('dataHeader**', dataHeader);
-
     let dataAbout = await selectQueryFactory(
       connection,
       'select name, text, image from group_section where content=? and code=?',
@@ -110,38 +108,42 @@ async function getDataMainPage() {
       text: row.text,
       image: row.image,
     }));
-    console.log('dataAbout**', dataAbout);
 
-    // aboutSection = aboutSection.map((row) => ({
-    //   name: row.name,
-    //   text: row.text,
-    //   image: row.image,
-    // }));
-    // dataMain[0].aboutSection = aboutSection;
+    let foto = await selectQueryFactory(
+      connection,
+      'select url from images where code=?',
+      [dataAbout[0].image]
+    );
+    foto = foto.map((row) => ({
+      url: row.url,
+    }));
+    dataAbout[0].image = foto[0].url;
 
-    // console.log('dataMain***', dataMain)
+    let dataServices = await selectQueryFactory(
+      connection,
+      `select name, text, image from group_section where content=10 and code='services'`,
+      []
+    );
+    dataServices = dataServices.map((row) => ({
+      name: row.name,
+      text: row.text,
+      image: row.image,
+    }));
 
-    // let foto = await selectQueryFactory(
-    //   connection,
-    //   'select url from images where code=?',
-    //   [dataMain[0].foto]
-    // );
-    // foto = foto.map((row) => ({
-    //   url: row.url,
-    // }));
-    // dataMain[0].foto = foto[0].url;
-
-    // let services = await selectQueryFactory(
-    //   connection,
-    //   'select * from lists where code=?',
-    //   [dataMain[0].services]
-    // );
-    // services = services.map((row) => row.name);
-    // dataMain[0].services = services;
-    // console.log('data in func', dataMain);
-    // return dataMain;
-    console.log(111, dataHeader, dataAbout);
-    return { dataHeader, dataAbout };
+    let images = await selectQueryFactory(
+      connection,
+      `select code, url from images `,
+      []
+    );
+    images = images.map((row) => ({ code: row.code, url: row.url }));
+    dataServices = dataServices.map((e) => {
+      const el = images.find((img) => img.code === e.image);
+      if (el) {
+        e.image = el.url;
+      } else e.image = '';
+      return e;
+    });
+    return { dataHeader, dataAbout, dataServices };
   } catch (error) {
     reportServerError(error, res);
   } finally {
@@ -150,10 +152,10 @@ async function getDataMainPage() {
 }
 
 webserver.get('/main', async (req, res) => {
-  let data;
   try {
-    data = await getDataMainPage();
-    res.render('pages/main', { data });
+    let data = await getDataMainPage();
+    const { dataHeader, dataAbout, dataServices } = data;
+    res.render('pages/main', { dataHeader, dataAbout, dataServices });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -162,11 +164,10 @@ webserver.get('/main', async (req, res) => {
 webserver.get('/admin', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    // console.log('data in admin', data);
-    const { dataHeader, dataAbout } = data;
-    console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
-    // res.render('pages/admin', { dataHeader, dataAbout });
-    res.render('pages/admin', { dataHeader, dataAbout });
+    const { dataHeader, dataAbout, dataServices } = data;
+    // console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
+    // console.log('dataServices in admin', dataServices);
+    res.render('pages/admin', { dataHeader, dataAbout, dataServices });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -288,9 +289,9 @@ webserver.post(
   '/saveAboutChange',
   upload.fields([{ name: 'aboutFoto', maxCount: 1 }]),
   async (req, res) => {
-    if (req.files.aboutFoto) {
-      try {
-        connection = await newConnectionFactory(pool, res);
+    try {
+      connection = await newConnectionFactory(pool, res);
+      if (req.files.aboutFoto) {
         await modifyQueryFactory(
           connection,
           `
@@ -298,21 +299,46 @@ webserver.post(
   ;`,
           [req.files.aboutFoto[0].originalname]
         );
-      } catch (error) {
-        reportServerError(error, res);
-      } finally {
-        if (connection) connection.release();
       }
-    }
-
-    try {
-      connection = await newConnectionFactory(pool, res);
       await modifyQueryFactory(
         connection,
         `
-          update group_section set name=?, text=? where content='10' and code='about'
-      ;`,
+            update group_section set name=?, text=? where content='10' and code='about'
+        ;`,
         [req.body.aboutTitle, req.body.aboutText]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+    res.send('ok');
+  }
+);
+
+webserver.post(
+  '/saveServiceChange/:1',
+  upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      connection = await newConnectionFactory(pool, res);
+      console.log('/saveServiceChange/:1*', req.body);
+      console.log('/saveServiceChange/:1**', req.files.serviceImage1);
+      if (req.files.serviceImage1) {
+        await modifyQueryFactory(
+          connection,
+          `
+      update images set url=? where code='indconsult'
+  ;`,
+          [req.files.serviceImage1[0].originalname]
+        );
+      }
+      await modifyQueryFactory(
+        connection,
+        `
+            update group_section set name=?, text=? where content='10' and code='service' and code_order = 1
+        ;`,
+        [req.body.serviceTitle1, req.body.serviceText1]
       );
     } catch (error) {
       reportServerError(error, res);

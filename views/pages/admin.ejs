@@ -1,177 +1,131 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Панель Администратора</title>
-    <link rel="stylesheet" href="main.css" />
-  </head>
 
-  <body>
-    <!-- Header Admin Panel -->
-    <header class="admin-header">
-      <h1>Панель администратора</h1>
-      <nav>
-        <ul>
-          <li><a href="#header">Шапка</a></li>
-          <li><a href="#about">Обо мне</a></li>
-          <li><a href="#services">Услуги</a></li>
-          <li><a href="#blog">Блог</a></li>
-        </ul>
-      </nav>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Панель Администратора</title>
+  <link rel="stylesheet" href="main.css" />
+</head>
 
-    <div class="admin-content">
-      <!-- Menu Section -->
-      <section class="admin-section" id="header">
-        <h2>Редактирование раздела "Шапка"</h2>
-        <form id="headerForm" enctype="multipart/form-data">
-          <label for="headerLogo">Логотип</label>
-          <input
-            type="file"
-            id="headerLogo"
-            name="headerLogo"
-            accept=".jpg,.jpeg"
-            value="<%=dataHeader[0].image %>"
-          />
-          <div>
-            <label for="headerMenu">Пункты меню</label>
-            <icon onclick="reloadHeaderMenu()">&#8635;</icon>
-          </div>
-          <div class="menu">
-            <menu id="headerMenu" name="headerMenu" required>
-              <% for(var i=0; i < dataHeader[0].list.length;i++) {%>
+<body>
+  <!-- Header Admin Panel -->
+  <header class="admin-header">
+    <h1>Панель администратора</h1>
+    <nav>
+      <ul>
+        <li><a href="#header">Шапка</a></li>
+        <li><a href="#about">Обо мне</a></li>
+        <li><a href="#services">Услуги</a></li>
+        <li><a href="#blog">Блог</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="admin-content">
+    <!-- Menu Section -->
+    <section class="admin-section" id="header">
+      <h2>Редактирование раздела "Шапка"</h2>
+      <form id="headerForm" enctype="multipart/form-data">
+        <label for="headerLogo">Логотип</label>
+        <input type="file" id="headerLogo" name="headerLogo" accept=".jpg,.jpeg" value="<%=dataHeader[0].image %>" />
+        <div>
+          <label for="headerMenu">Пункты меню</label>
+          <icon onclick="reloadHeaderMenu()">&#8635;</icon>
+        </div>
+        <div class="menu">
+          <menu id="headerMenu" name="headerMenu" required>
+            <% for(var i=0; i < dataHeader[0].list.length;i++) {%>
               <li id="menu<%=i%>">
-                <input
-                  value="<%=dataHeader[0].list[i] %>"
-                  name="headerMenu<%=i%>"
-                />
-                <button
-                  type="button"
-                  onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
-                >
+                <input value="<%=dataHeader[0].list[i] %>" name="headerMenu<%=i%>" />
+                <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})">
                   Удалить
                 </button>
               </li>
               <%} %>
-            </menu>
-            <button type="button" onclick="addHeaderMenu({idx:'<%=i %>'})">
-              Добавить пункт меню
-            </button>
-          </div>
-          <label for="headerContact">Контакт (моб. телефон)</label>
-          <input
-            type="text"
-            id="headerContact"
-            name="headerContact"
-            value="<%=dataHeader[0].text %>"
-            required
-          />
+          </menu>
+          <button type="button" onclick="addHeaderMenu({idx:'<%=i %>'})">
+            Добавить пункт меню
+          </button>
+        </div>
+        <label for="headerContact">Контакт (моб. телефон)</label>
+        <input type="text" id="headerContact" name="headerContact" value="<%=dataHeader[0].text %>" required />
+        <button type="submit">Сохранить</button>
+      </form>
+    </section>
+
+    <!-- About Section -->
+    <section class="admin-section" id="about">
+      <h2>Редактирование раздела "Обо мне"</h2>
+      <form id="aboutForm" enctype="multipart/form-data">
+        <label for="aboutTitle">Заголовок</label>
+        <input type="text" id="aboutTitle" name="aboutTitle" value="<%= dataAbout[0].name%>" required />
+
+        <label for="aboutText">Текст</label>
+        <textarea id="aboutText" name="aboutText" rows="5" required>
+                <%= dataAbout[0].text%></textarea>
+        <div class="row">
+          <label for="aboutFoto">Изображение (URL)</label>
+          <p id="aboutImage" name="aboutImage">
+            <%= dataAbout[0].image%>
+          </p>
+        </div>
+        <!-- <input type="file" id="aboutFoto" name="aboutFoto" accept=".jpg,.jpeg" value="<%=dataAbout[0].image %>" /> -->
+        <input type="file" name="aboutFoto" accept=".jpg,.jpeg" value="<%=dataAbout[0].image %>" />
+
+        <button type="submit">Сохранить</button>
+      </form>
+    </section>
+
+    <!-- Services Section -->
+    <section class="admin-section" id="services">
+      <h2>Редактирование раздела "Услуги"</h2>
+      <div class="service-item">
+        <form id="serviceForm">
+          <% for (let i=0; i < dataServices.length; i++) {%>
+            <h3>Услуга <%= i+1 %></h3>
+            <label for="serviceTitle<%=i+1%>">Заголовок</label>
+            <input type="text" id="serviceTitle<%=i+1%>" name="serviceTitle<%=i+1%>" value="<%= dataServices[i].name%>" required />
+
+            <label for="serviceText<%=i+1%>">Описание</label>
+            <textarea id="serviceText<%=i+1%>" name="serviceText<%=i+1%>" rows="4" required>
+<%= dataServices[i].text %></textarea>
+            <div class="row">
+              <label for="serviceImage<%=i+1%>">Изображение (URL)</label>
+              <p>
+                <%= dataServices[i].image %>
+              </p>
+            </div>
+            <input type="file" id="serviceImage<%=i+1%>" name="serviceImage<%=i+1%>" accept=".jpg,.jpeg"
+              value=" <%= dataServices[i].image %>"  />
+              <button type="submit" id="serviceButton<%=i+1%>" name="serviceButton<%=i+1%>">Сохранить</button>
+            <%} %>
+        </form>
+      </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="admin-section" id="blog">
+      <h2>Редактирование раздела "Блог"</h2>
+      <div class="article-item">
+        <h3>Статья 1</h3>
+        <form id="articleForm1">
+          <label for="articleTitle1">Заголовок</label>
+          <input type="text" id="articleTitle1" name="articleTitle1" value="Статья 1" required />
+
+          <label for="articleText1">Описание</label>
+          <textarea id="articleText1" name="articleText1" rows="4" required>
+Описание</textarea>
+
+          <label for="articleImage1">Изображение (URL)</label>
+          <input type="text" id="articleImage1" name="articleImage1" value="article1.jpg" required />
+
           <button type="submit">Сохранить</button>
         </form>
-      </section>
+      </div>
+    </section>
+  </div>
+</body>
 
-      <!-- About Section -->
-      <section class="admin-section" id="about">
-        <h2>Редактирование раздела "Обо мне"</h2>
-        <form id="aboutForm" enctype="multipart/form-data">
-          <label for="aboutTitle">Заголовок</label>
-          <input
-            type="text"
-            id="aboutTitle"
-            name="aboutTitle"
-            value="<%= dataAbout[0].name%>"
-            required
-          />
-
-          <label for="aboutText">Текст</label>
-          <textarea id="aboutText" name="aboutText" rows="5" required>
-                <%= dataAbout[0].text%></textarea
-          >
-          <div class="row">
-            <label for="aboutFoto">Изображение (URL)</label>
-            <p id="aboutImage" name="aboutImage"><%= dataAbout[0].image%></p>
-          </div>
-          <input
-            type="file"
-            id="aboutFoto"
-            name="aboutFoto"
-            accept=".jpg,.jpeg"
-            value="<%=dataAbout[0].image %>"
-          />
-
-          <button type="submit">Сохранить</button>
-        </form>
-      </section>
-
-      <!-- Services Section -->
-      <section class="admin-section" id="services">
-        <h2>Редактирование раздела "Услуги"</h2>
-        <div class="service-item">
-          <form id="serviceForm1">
-            <h3>Услуга 1</h3>
-            <label for="serviceTitle1">Заголовок</label>
-            <input
-              type="text"
-              id="serviceTitle1"
-              name="serviceTitle1"
-              value="Услуга 1"
-              required
-            />
-
-            <label for="serviceText1">Описание</label>
-            <textarea id="serviceText1" name="serviceText1" rows="4" required>
-Описание</textarea
-            >
-
-            <label for="serviceImage1">Изображение (URL)</label>
-            <input
-              type="text"
-              id="serviceImage1"
-              name="serviceImage1"
-              value="service1.jpg"
-              required
-            />
-
-            <button type="submit">Сохранить</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- Blog Section -->
-      <section class="admin-section" id="blog">
-        <h2>Редактирование раздела "Блог"</h2>
-        <div class="article-item">
-          <h3>Статья 1</h3>
-          <form id="articleForm1">
-            <label for="articleTitle1">Заголовок</label>
-            <input
-              type="text"
-              id="articleTitle1"
-              name="articleTitle1"
-              value="Статья 1"
-              required
-            />
-
-            <label for="articleText1">Описание</label>
-            <textarea id="articleText1" name="articleText1" rows="4" required>
-Описание</textarea
-            >
-
-            <label for="articleImage1">Изображение (URL)</label>
-            <input
-              type="text"
-              id="articleImage1"
-              name="articleImage1"
-              value="article1.jpg"
-              required
-            />
-
-            <button type="submit">Сохранить</button>
-          </form>
-        </div>
-      </section>
-    </div>
-  </body>
 </html>
 <script src="./script.js"></script>

@@ -46,7 +46,7 @@ section {
 
 icon {
   padding-left: 10px;
-} 
+}
 
 icon:hover {
   cursor: pointer;
@@ -83,8 +83,8 @@ section .menu button.disabled {
 }
 
 .row {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .row p {
@@ -101,7 +101,8 @@ button {
   color: white;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 0px;
+  margin-bottom: 15px;
 }
 
 button:hover {
