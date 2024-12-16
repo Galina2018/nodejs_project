@@ -18,8 +18,8 @@ const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  // password: '1234',
-  password: '',
+  password: '1234',
+  // password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -53,8 +53,8 @@ let dataMain;
 let dataHeader;
 let connection = null;
 
-function reportServerError(error) {
-  // res.status(500).end();
+function reportServerError(error, res) {
+  res.status(500).end();
   logLineAsync(logFN, `[${port}] ` + error);
 }
 async function getDataMainPage() {
@@ -80,7 +80,6 @@ async function getDataMainPage() {
       list: row.list,
       text: row.text,
     }));
-
     let logo = await selectQueryFactory(
       connection,
       'select url from images where code=?',
@@ -111,7 +110,7 @@ async function getDataMainPage() {
       text: row.text,
       image: row.image,
     }));
-    console.log('dataAbout**', dataAbout)
+    console.log('dataAbout**', dataAbout);
 
     // aboutSection = aboutSection.map((row) => ({
     //   name: row.name,
@@ -141,9 +140,10 @@ async function getDataMainPage() {
     // dataMain[0].services = services;
     // console.log('data in func', dataMain);
     // return dataMain;
-    return {dataHeader, dataAbout};
+    console.log(111, dataHeader, dataAbout);
+    return { dataHeader, dataAbout };
   } catch (error) {
-    reportServerError(error);
+    reportServerError(error, res);
   } finally {
     if (connection) connection.release();
   }
@@ -162,8 +162,8 @@ webserver.get('/main', async (req, res) => {
 webserver.get('/admin', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    console.log('data in admin', data);
-    const {dataHeader, dataAbout} = data;
+    // console.log('data in admin', data);
+    const { dataHeader, dataAbout } = data;
     console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
     // res.render('pages/admin', { dataHeader, dataAbout });
     res.render('pages/admin', { dataHeader, dataAbout });
@@ -310,8 +310,8 @@ webserver.post(
       await modifyQueryFactory(
         connection,
         `
-      update content_page set about_title=?, about_text=? where content='10'
-  ;`,
+          update group_section set name=?, text=? where content='10' and code='about'
+      ;`,
         [req.body.aboutTitle, req.body.aboutText]
       );
     } catch (error) {
