@@ -10,26 +10,26 @@
   <body>
     <!-- Header Section -->
     <header class="header">
-      <div><img src="<%=data[0].logo %>" width="70px" alt="Логотип" /></div>
+      <div><img src="<%=dataHeader[0].image %>" width="70px" alt="Логотип" /></div>
       <nav class="menu">
         <ul>
-          <% for(var i=0; i < data[0].menu.length; i++) {%>
-          <li><%= data[0].menu[i] %></li>
+          <% for(var i=0; i < dataHeader[0].list.length; i++) {%>
+          <li><%= dataHeader[0].list[i] %></li>
           <%} %>
         </ul>
       </nav>
       <div class="phone">
-        <p>Телефон: <%= data[0].contact %></p>
+        <p>Телефон: <%= dataHeader[0].text %></p>
       </div>
     </header>
 
     <!-- About Section -->
     <section class="about" id="about">
       <div class="about-content">
-        <img src="<%=data[0].foto %>" alt="Обо мне" />
+        <img src="<%=dataAbout[0].image %>" alt="Обо мне" />
         <div class="text">
-          <h2><%= data[0].aboutTitle %></h2>
-          <p><%= data[0].aboutText %></p>
+          <h2><%= dataAbout[0].name %></h2>
+          <p><%= dataAbout[0].text %></p>
           <button>Подробнее</button>
         </div>
       </div>

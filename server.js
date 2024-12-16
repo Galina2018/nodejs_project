@@ -112,24 +112,15 @@ async function getDataMainPage() {
     }));
     console.log('dataAbout**', dataAbout);
 
-    // aboutSection = aboutSection.map((row) => ({
-    //   name: row.name,
-    //   text: row.text,
-    //   image: row.image,
-    // }));
-    // dataMain[0].aboutSection = aboutSection;
-
-    // console.log('dataMain***', dataMain)
-
-    // let foto = await selectQueryFactory(
-    //   connection,
-    //   'select url from images where code=?',
-    //   [dataMain[0].foto]
-    // );
-    // foto = foto.map((row) => ({
-    //   url: row.url,
-    // }));
-    // dataMain[0].foto = foto[0].url;
+    let foto = await selectQueryFactory(
+      connection,
+      'select url from images where code=?',
+      [dataAbout[0].image]
+    );
+    foto = foto.map((row) => ({
+      url: row.url,
+    }));
+    dataAbout[0].image = foto[0].url;
 
     // let services = await selectQueryFactory(
     //   connection,
@@ -150,10 +141,10 @@ async function getDataMainPage() {
 }
 
 webserver.get('/main', async (req, res) => {
-  let data;
   try {
-    data = await getDataMainPage();
-    res.render('pages/main', { data });
+    let data = await getDataMainPage();
+    const { dataHeader, dataAbout } = data;
+    res.render('pages/main', { dataHeader, dataAbout });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -288,9 +279,9 @@ webserver.post(
   '/saveAboutChange',
   upload.fields([{ name: 'aboutFoto', maxCount: 1 }]),
   async (req, res) => {
-    if (req.files.aboutFoto) {
-      try {
-        connection = await newConnectionFactory(pool, res);
+    try {
+      connection = await newConnectionFactory(pool, res);
+      if (req.files.aboutFoto) {
         await modifyQueryFactory(
           connection,
           `
@@ -298,20 +289,12 @@ webserver.post(
   ;`,
           [req.files.aboutFoto[0].originalname]
         );
-      } catch (error) {
-        reportServerError(error, res);
-      } finally {
-        if (connection) connection.release();
       }
-    }
-
-    try {
-      connection = await newConnectionFactory(pool, res);
       await modifyQueryFactory(
         connection,
         `
-          update group_section set name=?, text=? where content='10' and code='about'
-      ;`,
+            update group_section set name=?, text=? where content='10' and code='about'
+        ;`,
         [req.body.aboutTitle, req.body.aboutText]
       );
     } catch (error) {
