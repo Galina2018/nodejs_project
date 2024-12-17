@@ -56,11 +56,11 @@ async function saveServiceChange(evt) {
   data = data.filter(([key, val]) => !!key.match(rgxp));
   const dataService = new FormData();
   data.forEach((e) => {
-    dataService.append(e[0], e[1]);
+    // if (e[0].match(/serviceImage/)) {
+    dataService.append(e[0].slice(0, -1), e[1]);
+    // } else dataService.append(e[0], e[1]);
   });
-  dataService.append('serviceNumber', serviceNumber);
-
-  await fetch('/saveServiceChange/:serviceNumber', {
+  await fetch(`/saveServiceChange/${serviceNumber}`, {
     method: 'POST',
     body: dataService,
   });

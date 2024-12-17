@@ -317,28 +317,26 @@ webserver.post(
 );
 
 webserver.post(
-  '/saveServiceChange/:1',
-  upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
+  '/saveServiceChange/:serviceNumber',
+  upload.fields([{ name: `serviceImage`, maxCount: 1 }]),
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
-      console.log('/saveServiceChange/:1*', req.body);
-      console.log('/saveServiceChange/:1**', req.files.serviceImage1);
-      if (req.files.serviceImage1) {
+      if (req.files.serviceImage) {
         await modifyQueryFactory(
           connection,
           `
       update images set url=? where code='indconsult'
   ;`,
-          [req.files.serviceImage1[0].originalname]
+          [req.files.serviceImage[0].originalname]
         );
       }
       await modifyQueryFactory(
         connection,
         `
-            update group_section set name=?, text=? where content='10' and code='service' and code_order = 1
+            update group_section set name=?, text=? where content='10' and code='services' and code_order=?
         ;`,
-        [req.body.serviceTitle1, req.body.serviceText1]
+        [req.body.serviceTitle, req.body.serviceText, req.params.serviceNumber]
       );
     } catch (error) {
       reportServerError(error, res);
@@ -348,28 +346,5 @@ webserver.post(
     res.send('ok');
   }
 );
-
-// webserver.post(
-//   '/saveService1Change',
-//   upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
-//   async (req, res) => {
-//     if (req.files.serviceImage1) {
-//       try {
-//         connection = await newConnectionFactory(pool, res);
-//         await modifyQueryFactory(
-//           connection,
-//           `
-//       update images set url=? where code='foto'
-//   ;`,
-//           [req.files.serviceImage1[0].originalname]
-//         );
-//       } catch (error) {
-//         reportServerError(error, res);
-//       } finally {
-//         if (connection) connection.release();
-//       }
-//     }
-//   }
-// );
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));
