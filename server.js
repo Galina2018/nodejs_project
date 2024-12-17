@@ -317,20 +317,18 @@ webserver.post(
 );
 
 webserver.post(
-  '/saveServiceChange/:1',
-  upload.fields([{ name: 'serviceImage1', maxCount: 1 }]),
+  '/saveServiceChange/:serviceNumber',
+  upload.fields([{ name: `serviceImage`, maxCount: 1 }]),
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
-      console.log('/saveServiceChange/:1*', req.body);
-      console.log('/saveServiceChange/:1**', req.files.serviceImage1);
-      if (req.files.serviceImage1) {
+      if (req.files.serviceImage) {
         await modifyQueryFactory(
           connection,
           `
       update images set url=? where code='indconsult'
   ;`,
-          [req.files.serviceImage1[0].originalname]
+          [req.files.serviceImage[0].originalname]
         );
       }
       await modifyQueryFactory(
