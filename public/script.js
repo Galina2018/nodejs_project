@@ -5,7 +5,7 @@ aboutForm.addEventListener('submit', saveAboutChange);
 const serviceForm = document.getElementById('serviceForm');
 serviceForm.addEventListener('submit', saveServiceChange);
 
-async function addHeaderMenu({ idx }) {
+async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
   headerMenu.innerHTML += `<li id=menu><input value='' name="headerMenu" />
   <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
@@ -56,9 +56,7 @@ async function saveServiceChange(evt) {
   data = data.filter(([key, val]) => !!key.match(rgxp));
   const dataService = new FormData();
   data.forEach((e) => {
-    // if (e[0].match(/serviceImage/)) {
     dataService.append(e[0].slice(0, -1), e[1]);
-    // } else dataService.append(e[0], e[1]);
   });
   await fetch(`/saveServiceChange/${serviceNumber}`, {
     method: 'POST',
@@ -66,20 +64,12 @@ async function saveServiceChange(evt) {
   });
 }
 
-// async function saveService1Change(evt) {
-//   evt.preventDefault();
-//   console.log('in script saveService1Change')
-//   await fetch('/saveService1Change', {
-//     method: 'POST',
-//     body: new FormData(serviceForm1),
-//   });
-// }
-
 async function reloadHeaderMenu() {
   console.log('=in reloadHeaderMenu');
   await fetch('/admin', {
     method: 'GET',
   });
+  let headerMenu = document.getElementById('headerMenu');
   const lastLi = document.querySelector('menu > li:last-child');
   const lastInput = document.querySelector('menu > li:last-child input');
   const lastIindex = document.querySelectorAll('menu > li');

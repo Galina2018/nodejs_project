@@ -37,19 +37,14 @@
 
     <!-- Services Section -->
     <section class="services" id="services">
-      <h2>Мои услуги</h2>
-      <div class="service">
-        <img src="service1.jpg" alt="Услуга 1" />
-        <p>Услуга 1: Описание услуги.</p>
-      </div>
-      <div class="service">
-        <img src="service2.jpg" alt="Услуга 2" />
-        <p>Услуга 2: Описание услуги.</p>
-      </div>
-      <div class="service">
-        <img src="service3.jpg" alt="Услуга 3" />
-        <p>Услуга 3: Описание услуги.</p>
-      </div>
+      <h2><%= dataHeader[0].list[2] %></h2>
+      <% for (let i=0; i < dataServices.length; i++) {%> 
+        <div class="service">
+          <img src="<%=dataServices[i].image %>" alt="Услуга 1" />
+          <p><%=dataServices[i].name%></p>
+          <p><%=dataServices[i].text%></p>
+        </div>
+        <%} %>
     </section>
 
     <!-- Blog Section -->
