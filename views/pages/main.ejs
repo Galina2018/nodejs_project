@@ -1,84 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <link rel="stylesheet" href="main.css" />
-</head>
-
-<body>
-  <!-- Header Section -->
-  <header class="header">
-    <div><img src="<%=dataHeader[0].image %>" width="70px" alt="Логотип" /></div>
-    <nav class="menu">
-      <ul>
-        <% for(var i=0; i < dataHeader[0].list.length; i++) {%>
-          <li>
-            <%= dataHeader[0].list[i] %>
-          </li>
-          <%} %>
-      </ul>
-    </nav>
-    <div class="phone">
-      <p>Телефон: <%= dataHeader[0].text %>
-      </p>
-    </div>
-  </header>
-
-  <!-- About Section -->
-  <section class="about" id="about">
-    <div class="about-content">
-      <img src="<%=dataAbout[0].image %>" alt="Обо мне" />
-      <div class="text">
-        <h2>
-          <%= dataAbout[0].name %>
-        </h2>
-        <p>
-          <%= dataAbout[0].text %>
-        </p>
-        <button>Подробнее</button>
+  <body>
+    <!-- Header Section -->
+    <header class="header">
+      <div>
+        <img src="<%=dataHeader[0].image %>" width="70px" alt="Логотип" />
       </div>
-    </div>
-  </section>
+      <nav class="menu">
+        <ul>
+          <% for(var i=0; i < dataHeader[0].list.length; i++) {%>
+          <li><%= dataHeader[0].list[i] %></li>
+          <%} %>
+        </ul>
+      </nav>
+      <div class="phone">
+        <p>Телефон: <%= dataHeader[0].text %></p>
+      </div>
+    </header>
 
-  <!-- Services Section -->
-  <section class="services" id="services">
-    <h2>
-      <%= dataHeader[0].list[2] %>
-    </h2>
-    <% for (let i=0; i < dataServices.length; i++) {%>
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="about-content">
+        <img src="<%=dataAbout[0].image %>" alt="Обо мне" />
+        <div class="text">
+          <h2><%= dataHeader[0].list[1] %></h2>
+          <p><%= dataAbout[0].text %></p>
+          <button>Подробнее</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+      <h2><%= dataHeader[0].list[2] %></h2>
+      <% for (let i=0; i < dataServices.length; i++) {%>
       <div class="service">
         <img src="<%=dataServices[i].image %>" alt="Услуга 1" />
-        <p>
-          <%=dataServices[i].name%>
-        </p>
-        <p>
-          <%=dataServices[i].text%>
-        </p>
+        <p><%=dataServices[i].name%></p>
+        <p><%=dataServices[i].text%></p>
       </div>
       <%} %>
-  </section>
+    </section>
 
-  <!-- Blog Section -->
-  <section class="blog" id="blog">
-    <h2>
-      <%= dataHeader[0].list[3] %>
-    </h2>
-    <% for (let i=0; i < dataArticles.length; i++) {%>
+    <!-- Blog Section -->
+    <section class="blog" id="blog">
+      <h2><%= dataHeader[0].list[3] %></h2>
+      <% for (let i=0; i < dataArticles.length; i++) {%>
       <div class="article">
         <img src="<%=dataArticles[i].image %>" alt="Статья" />
-        <p>
-          <%=dataArticles[i].name%>
-        </p>
-        <p>
-          <%=dataArticles[i].text%>
-        </p>
+        <p><%=dataArticles[i].name%></p>
+        <p><%=dataArticles[i].text%></p>
       </div>
       <%} %>
-  </section>
-</body>
-
+    </section>
+  </body>
 </html>
 <script src="./script.js"></script>
