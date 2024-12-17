@@ -19,8 +19,8 @@ const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  password: '1234',
-  // password: '',
+  // password: '1234',
+  password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -49,6 +49,10 @@ webserver.use(bodyParser.text({}));
 webserver.use(bodyParser.json({}));
 webserver.use(express.urlencoded({ extended: true }));
 webserver.use(express.static(path.resolve(__dirname, 'public')));
+webserver.use(
+  '/tinymce',
+  express.static(path.join(__dirname, 'node_modules', 'tinymce'))
+);
 
 let dataMain;
 let dataHeader;

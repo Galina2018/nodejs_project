@@ -5,11 +5,12 @@
   "private": true,
   "repository": {},
   "dependencies": {
-    "express": "4.21.1",
     "body-parser": "^1.20.3",
+    "ejs": "^3.1.5",
+    "express": "4.21.1",
     "multer": "1.4.5-lts.1",
     "mysql": "^2.18.1",
-    "ejs": "^3.1.5"
+    "tinymce": "^7.6.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
