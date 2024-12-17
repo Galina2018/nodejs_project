@@ -130,13 +130,15 @@ async function getDataMainPage() {
       text: row.text,
       image: row.image,
     }));
-
     let images = await selectQueryFactory(
       connection,
       `select code, url from images `,
       []
     );
-    images = images.map((row) => ({ code: row.code, url: row.url }));
+    images = images.map((row) => ({
+      code: row.code,
+      url: row.url,
+    }));
     dataServices = dataServices.map((e) => {
       const el = images.find((img) => img.code === e.image);
       if (el) {
@@ -144,8 +146,27 @@ async function getDataMainPage() {
       } else e.image = '';
       return e;
     });
-    console.log(789, dataHeader, dataAbout, dataServices);
-    return { dataHeader, dataAbout, dataServices };
+
+    let dataArticles = await selectQueryFactory(
+      connection,
+      `select name, text, image from group_section where content=10 and code='articles' order by code_order`,
+      []
+    );
+    dataArticles = dataArticles.map((row) => ({
+      name: row.name,
+      text: row.text,
+      image: row.image,
+    }));
+    dataArticles = dataArticles.map((e) => {
+      const el = images.find((img) => img.code === e.image);
+      if (el) {
+        e.image = el.url;
+      } else e.image = '';
+      return e;
+    });
+    // console.log('**dataArticles**', dataArticles);
+    // console.log(789, dataArticles);
+    return { dataHeader, dataAbout, dataServices, dataArticles };
   } catch (error) {
     reportServerError(error, res);
   } finally {
@@ -156,9 +177,13 @@ async function getDataMainPage() {
 webserver.get('/main', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout, dataServices } = data;
-    // console.log('dataServices in main', dataServices);
-    res.render('pages/main', { dataHeader, dataAbout, dataServices });
+    const { dataHeader, dataAbout, dataServices, dataArticles } = data;
+    res.render('pages/main', {
+      dataHeader,
+      dataAbout,
+      dataServices,
+      dataArticles,
+    });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -167,11 +192,13 @@ webserver.get('/main', async (req, res) => {
 webserver.get('/admin', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout, dataServices } = data;
-    // console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
-    // console.log('dataServices in admin', dataServices);
-    // console.log('dataServices in admin', dataServices);
-    res.render('pages/admin', { dataHeader, dataAbout, dataServices });
+    const { dataHeader, dataAbout, dataServices, dataArticles } = data;
+    res.render('pages/admin', {
+      dataHeader,
+      dataAbout,
+      dataServices,
+      dataArticles,
+    });
   } catch (error) {
     reportServerError(error, res);
   }
@@ -343,18 +370,51 @@ webserver.post(
           [req.files.serviceImage[0].originalname, imageCode]
         );
       }
-      console.log(
-        '**',
-        req.body.serviceTitle,
-        req.body.serviceText,
-        req.params.serviceNumber
-      );
       await modifyQueryFactory(
         connection,
         `
             update group_section set name=?, text=? where content='10' and code='services' and code_order=?
         ;`,
         [req.body.serviceTitle, req.body.serviceText, req.params.serviceNumber]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+    res.send('ok');
+  }
+);
+
+webserver.post(
+  '/saveArticlesChange/:articleNumber',
+  upload.fields([{ name: `articleImage`, maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      connection = await newConnectionFactory(pool, res);
+      let imageCode = await selectQueryRowFactory(
+        connection,
+        `
+        select image from group_section where content='10' and code='articles' and code_order=?
+        ;`,
+        [req.params.articleNumber]
+      );
+      imageCode = imageCode.image;
+      if (req.files.articleImage) {
+        await modifyQueryFactory(
+          connection,
+          `
+      update images set url=? where code=?
+  ;`,
+          [req.files.articleImage[0].originalname, imageCode]
+        );
+      }
+      await modifyQueryFactory(
+        connection,
+        `
+            update group_section set name=?, text=? where content='10' and code='articles' and code_order=?
+        ;`,
+        [req.body.articleTitle, req.body.articleText, req.params.articleNumber]
       );
     } catch (error) {
       reportServerError(error, res);

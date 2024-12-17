@@ -4,6 +4,8 @@ const aboutForm = document.getElementById('aboutForm');
 aboutForm.addEventListener('submit', saveAboutChange);
 const serviceForm = document.getElementById('serviceForm');
 serviceForm.addEventListener('submit', saveServiceChange);
+const articleForm = document.getElementById('articleForm');
+articleForm.addEventListener('submit', saveArticlesChange);
 
 async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
@@ -63,9 +65,25 @@ async function saveServiceChange(evt) {
     body: dataService,
   });
 }
+async function saveArticlesChange(evt) {
+  evt.preventDefault();
+  console.log('in saveArticlesChange');
+  const articleNumber = evt.submitter.name.slice(-1);
+  let data = Array.from(new FormData(articleForm));
+  let rgxp = new RegExp(articleNumber);
+  data = data.filter(([key, val]) => !!key.match(rgxp));
+  const dataArticles = new FormData();
+  data.forEach((e) => {
+    dataArticles.append(e[0].slice(0, -1), e[1]);
+  });
+  await fetch(`/saveArticlesChange/${articleNumber}`, {
+    method: 'POST',
+    body: dataArticles,
+  });
+}
 
 async function reloadHeaderMenu() {
-  console.log('=in reloadHeaderMenu');
+  // console.log('=in reloadHeaderMenu');
   await fetch('/admin', {
     method: 'GET',
   });
