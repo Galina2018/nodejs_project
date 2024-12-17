@@ -8,6 +8,7 @@ const { logLineAsync } = require('./utils');
 const {
   newConnectionFactory,
   selectQueryFactory,
+  selectQueryRowFactory,
   modifyQueryFactory,
   getLastInsertedId,
   getModifiedRowsCount,
@@ -143,6 +144,7 @@ async function getDataMainPage() {
       } else e.image = '';
       return e;
     });
+    console.log(789, dataHeader, dataAbout, dataServices);
     return { dataHeader, dataAbout, dataServices };
   } catch (error) {
     reportServerError(error, res);
@@ -155,6 +157,7 @@ webserver.get('/main', async (req, res) => {
   try {
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices } = data;
+    // console.log('dataServices in main', dataServices);
     res.render('pages/main', { dataHeader, dataAbout, dataServices });
   } catch (error) {
     reportServerError(error, res);
@@ -166,6 +169,7 @@ webserver.get('/admin', async (req, res) => {
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices } = data;
     // console.log('dataHeader, dataAbout in admin', dataHeader, dataAbout);
+    // console.log('dataServices in admin', dataServices);
     // console.log('dataServices in admin', dataServices);
     res.render('pages/admin', { dataHeader, dataAbout, dataServices });
   } catch (error) {
@@ -322,15 +326,29 @@ webserver.post(
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
+      let imageCode = await selectQueryRowFactory(
+        connection,
+        `
+            select image from group_section where content='10' and code='services' and code_order=?
+        ;`,
+        [req.params.serviceNumber]
+      );
+      imageCode = imageCode.image;
       if (req.files.serviceImage) {
         await modifyQueryFactory(
           connection,
           `
-      update images set url=? where code='indconsult'
+      update images set url=? where code=?
   ;`,
-          [req.files.serviceImage[0].originalname]
+          [req.files.serviceImage[0].originalname, imageCode]
         );
       }
+      console.log(
+        '**',
+        req.body.serviceTitle,
+        req.body.serviceText,
+        req.params.serviceNumber
+      );
       await modifyQueryFactory(
         connection,
         `
