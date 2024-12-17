@@ -83,9 +83,11 @@
       <div class="service-item">
         <form id="serviceForm">
           <% for (let i=0; i < dataServices.length; i++) {%>
-            <h3>Услуга <%= i+1 %></h3>
+            <h3>Услуга <%= i+1 %>
+            </h3>
             <label for="serviceTitle<%=i+1%>">Заголовок</label>
-            <input type="text" id="serviceTitle<%=i+1%>" name="serviceTitle<%=i+1%>" value="<%= dataServices[i].name%>" required />
+            <input type="text" id="serviceTitle<%=i+1%>" name="serviceTitle<%=i+1%>" value="<%= dataServices[i].name%>"
+              required />
 
             <label for="serviceText<%=i+1%>">Описание</label>
             <textarea id="serviceText<%=i+1%>" name="serviceText<%=i+1%>" rows="4" required>
@@ -96,9 +98,9 @@
                 <%= dataServices[i].image %>
               </p>
             </div>
-            <input type="file" id="serviceImage<%=i+1%>" name="serviceImage<%=i+1%>" accept=".jpg,.jpeg"
-              value=" <%= dataServices[i].image %>"  />
-              <button type="submit" id="serviceButton<%=i+1%>" name="serviceButton<%=i+1%>">Сохранить</button>
+            <input type="file" id="serviceImage<%=i+1%>" name="serviceImage" accept=".jpg,.jpeg"
+              value=" <%= dataServices[i].image %>" />
+            <button type="submit" id="serviceButton<%=i+1%>" name="serviceButton<%=i+1%>">Сохранить</button>
             <%} %>
         </form>
       </div>
@@ -108,19 +110,24 @@
     <section class="admin-section" id="blog">
       <h2>Редактирование раздела "Блог"</h2>
       <div class="article-item">
-        <h3>Статья 1</h3>
-        <form id="articleForm1">
-          <label for="articleTitle1">Заголовок</label>
-          <input type="text" id="articleTitle1" name="articleTitle1" value="Статья 1" required />
+        <form id="articleForm">
+          <% for (let i=0; i < dataArticles.length; i++) {%>
+            <h3>Статья <%=i+1%></h3>
+            <label for="articleTitle<%=i+1%>">Заголовок</label>
+            <input type="text" id="articleTitle<%=i+1%>" name="articleTitle<%=i+1%>" value="<%= dataArticles[i].name%>" required />
 
-          <label for="articleText1">Описание</label>
-          <textarea id="articleText1" name="articleText1" rows="4" required>
-Описание</textarea>
-
-          <label for="articleImage1">Изображение (URL)</label>
-          <input type="text" id="articleImage1" name="articleImage1" value="article1.jpg" required />
-
-          <button type="submit">Сохранить</button>
+            <label for="articleText<%=i+1%>">Описание</label>
+            <textarea id="articleText<%=i+1%>" name="articleText<%=i+1%>" rows="4" required>
+              <%= dataArticles[i].text %></textarea>
+            <div class="row">
+              <label for="articleImage<%=i+1%>">Изображение (URL)</label>
+              <p>
+                <%= dataArticles[i].image %>
+              </p>
+            </div>
+            <input type="file" id="articleImage<%=i+1%>" name="articleImage<%=i+1%>" />
+            <button type="submit" id="articleButton<%=i+1%>" name="articleButton<%=i+1%>">Сохранить</button>
+            <%} %>
         </form>
       </div>
     </section>
