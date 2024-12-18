@@ -19,7 +19,7 @@ header {
 }
 
 header .logo img {
-  max-width: 70px;
+  max-width: 100px;
 }
 
 header nav ul {
@@ -78,8 +78,12 @@ section .menu button.disabled {
 
 .about img {
   width: 200px;
-  height: 200px;
+  height: 300px;
   object-fit: cover;
+}
+
+.about .text {
+  max-width: 500px;
 }
 
 .row {
@@ -89,10 +93,6 @@ section .menu button.disabled {
 
 .row p {
   margin-left: 5px;
-}
-
-.about .text {
-  max-width: 500px;
 }
 
 button {
@@ -172,15 +172,11 @@ button:hover {
   top: 0;
 }
 
-.admin-header h1 {
-  padding-top: 20px;
-}
-
 .admin-header nav ul {
   display: flex;
   justify-content: center;
   list-style-type: none;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .admin-header nav ul li {
@@ -194,7 +190,6 @@ button:hover {
 
 .admin-content {
   padding: 20px;
-  margin-top: 50px;
 }
 
 .admin-section {
@@ -227,6 +222,71 @@ button:hover {
   border-radius: 5px;
 }
 
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.login-btn {
+  padding: 12px;
+  font-size: 16px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-btn:hover {
+  background-color: #555;
+}
+
 @media (max-width: 768px) {
   .about-content {
     flex-direction: column;
@@ -235,5 +295,22 @@ button:hover {
   .service,
   .article {
     width: 100%;
+  }
+  .login-container {
+    padding: 20px;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+  }
+
+  .input-group input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .login-btn {
+    font-size: 14px;
+    padding: 10px;
   }
 }
