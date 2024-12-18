@@ -6,12 +6,12 @@
     <title>Панель Администратора</title>
     <link rel="stylesheet" href="main.css" />
     <script
-      src="/node_modules/tinymce/tinymce.min.js"
+      src="/tinymce/tinymce.min.js"
       referrerpolicy="origin"
     ></script>
     <script
       type="application/javascript"
-      src="/public/my-tinymce-config.js"
+      src="/my-tinymce-config.js"
     ></script>
   </head>
 
@@ -92,8 +92,8 @@
             required
           />
 
-          <label for="aboutText">Текст</label>
-          <textarea id="aboutText" name="aboutText" rows="5" required>
+          <label for="editable">Текст</label>
+          <textarea id="editable" name="aboutText" rows="5" required>
                 <%= dataAbout[0].text%></textarea
           >
           <div class="row">
@@ -129,7 +129,6 @@
             />
 
             <label for="editable">Описание</label>
-            <!-- <label for="serviceText<%=i+1%>">Описание</label> -->
             <textarea
               id="editable"
               name="serviceText<%=i+1%>"
@@ -177,9 +176,9 @@
               required
             />
 
-            <label for="articleText<%=i+1%>">Описание</label>
+            <label for="editable">Описание</label>
             <textarea
-              id="articleText<%=i+1%>"
+              id="editable"
               name="articleText<%=i+1%>"
               rows="4"
               required
