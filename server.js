@@ -19,8 +19,8 @@ const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  // password: '1234',
-  password: '',
+  password: '1234',
+  // password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -178,7 +178,7 @@ async function getDataMainPage() {
   }
 }
 
-webserver.get('/main', async (req, res) => {
+webserver.get('/', async (req, res) => {
   try {
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices, dataArticles } = data;
@@ -396,6 +396,13 @@ webserver.post(
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
+      await modifyQueryFactory(
+        connection,
+        `
+            update group_section set name=?, text=? where content='10' and code='articles' and code_order=?
+        ;`,
+        [req.body.articleTitle, req.body.articleText, req.params.articleNumber]
+      );
       let imageCode = await selectQueryRowFactory(
         connection,
         `
@@ -413,13 +420,6 @@ webserver.post(
           [req.files.articleImage[0].originalname, imageCode]
         );
       }
-      await modifyQueryFactory(
-        connection,
-        `
-            update group_section set name=?, text=? where content='10' and code='articles' and code_order=?
-        ;`,
-        [req.body.articleTitle, req.body.articleText, req.params.articleNumber]
-      );
     } catch (error) {
       reportServerError(error, res);
     } finally {
