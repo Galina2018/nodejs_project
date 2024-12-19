@@ -116,7 +116,7 @@
       <section class="admin-section" id="services">
         <h2>Редактирование раздела "Услуги"</h2>
         <div class="service-item">
-          <form id="serviceForm">
+          <form id="serviceForm" enctype="multipart/form-data">
             <% for (let i=0; i < dataServices.length; i++) {%>
             <h3>Услуга <%= i+1 %></h3>
             <label for="serviceTitle<%=i+1%>">Заголовок</label>
@@ -164,7 +164,7 @@
       <section class="admin-section" id="blog">
         <h2>Редактирование раздела "Блог"</h2>
         <div class="article-item">
-          <form id="articleForm">
+          <form id="articleForm" enctype="multipart/form-data">
             <% for (let i=0; i < dataArticles.length; i++) {%>
             <h3>Статья <%=i+1%></h3>
             <label for="articleTitle<%=i+1%>">Заголовок</label>

@@ -5,6 +5,9 @@ const multer = require('multer');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const { logLineAsync } = require('./utils');
+const { hashPassword, verifyUser } = require('./funcHash');
+const crypto = require('crypto');
+
 const {
   newConnectionFactory,
   selectQueryFactory,
@@ -178,6 +181,60 @@ async function getDataMainPage() {
   }
 }
 
+async function saveUser({ login, password }) {
+  console.log('login, password', login, password);
+  try {
+    connection = await newConnectionFactory(pool, res);
+    await modifyQueryFactory(
+      connection,
+      `
+          insert into users(login, password)
+          values (?,?)
+      ;`,
+      [login, password]
+    );
+  } catch (error) {
+    reportServerError(error, res);
+  } finally {
+    if (connection) connection.release();
+  }
+}
+async function getUser(login) {
+  try {
+    connection = await newConnectionFactory(pool, res);
+    const user = await selectQueryFactory(
+      connection,
+      `
+          select login, password from users where login=?
+         
+      ;`,
+      [login]
+    );
+    return user;
+  } catch (error) {
+    reportServerError(error, res);
+  } finally {
+    if (connection) connection.release();
+  }
+}
+
+async function verificationUser(login, password) {
+  let storedUser = await getUser(login);
+  storedUser = storedUser.map((row) => ({
+    login: row.login,
+    password: row.password,
+  }));
+  if (storedUser.length) {
+    const verify = await verifyUser(
+      login,
+      storedUser[0].login,
+      password,
+      storedUser[0].password
+    );
+    return verify;
+  } else return false;
+}
+
 webserver.get('/', async (req, res) => {
   try {
     let data = await getDataMainPage();
@@ -205,6 +262,50 @@ webserver.get('/admin', async (req, res) => {
     });
   } catch (error) {
     reportServerError(error, res);
+  }
+});
+
+webserver.get('/login', (req, res) => {
+  try {
+    res.render('pages/login');
+  } catch (error) {
+    reportServerError(error, res);
+  }
+});
+
+webserver.post('/login', upload.none(), async (req, res) => {
+  const isVerify = await verificationUser(req.body.username, req.body.password);
+  if (isVerify) {
+    try {
+      const token = crypto.randomBytes(60).toString('hex');
+      console.log('token', token);
+      console.log('req.body.username', req.body.username);
+      connection = await newConnectionFactory(pool, res);
+      // await modifyQueryFactory(
+      //   connection,
+      //   `
+      //     insert into sessions(login, date, token)
+      //     values (?,?)
+      // ;`,
+      //   [req.body.username, new Date(), token]
+      // );
+      await modifyQueryFactory(
+        connection,
+        `
+          insert into sessions( date, token)
+          values (?,?)
+      ;`,
+        [new Date(), token]
+      );
+    } catch (error) {
+      reportServerError(error, res);
+    }
+    res.send('Verification is successful.');
+  } else {
+    // const hashedPassword = await hashPassword(req.body.password);
+    // saveUser({ login: req.body.username, password: hashedPassword });
+    // res.status(201).send('New user registered successfully');
+    res.status(401).send('Verification failed.');
   }
 });
 

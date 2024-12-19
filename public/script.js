@@ -1,11 +1,14 @@
 const headerForm = document.getElementById('headerForm');
-headerForm.addEventListener('submit', saveHeaderChange);
+headerForm?.addEventListener('submit', saveHeaderChange);
 const aboutForm = document.getElementById('aboutForm');
-aboutForm.addEventListener('submit', saveAboutChange);
+aboutForm?.addEventListener('submit', saveAboutChange);
 const serviceForm = document.getElementById('serviceForm');
-serviceForm.addEventListener('submit', saveServiceChange);
+serviceForm?.addEventListener('submit', saveServiceChange);
 const articleForm = document.getElementById('articleForm');
-articleForm.addEventListener('submit', saveArticlesChange);
+articleForm?.addEventListener('submit', saveArticlesChange);
+
+const loginForm = document.getElementById('loginForm');
+loginForm?.addEventListener('submit', auth);
 
 async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
@@ -102,4 +105,14 @@ async function reloadHeaderMenu() {
     btnAdd.disabled = false;
     btnAdd.className = '';
   }
+}
+
+async function auth(evt) {
+  evt.preventDefault();
+  const response = await fetch('/login', {
+    method: 'POST',
+    body: new FormData(loginForm),
+  });
+  console.log('resp', response);
+  if (response.ok) location.href = '/admin';
 }
