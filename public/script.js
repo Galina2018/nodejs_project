@@ -10,6 +10,10 @@ articleForm?.addEventListener('submit', saveArticlesChange);
 const loginForm = document.getElementById('loginForm');
 loginForm?.addEventListener('submit', auth);
 
+function toLoginPage() {
+  location.href = '/login';
+}
+
 async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
   headerMenu.innerHTML += `<li id=menu><input value='' name="headerMenu" />
@@ -17,10 +21,14 @@ async function addHeaderMenu() {
 >Удалить</button></li>`;
   const last = document.querySelector('menu > li:last-child input');
   last.value = '';
-  const btn = document.querySelector('menu ~ button');
+  const btnAdd = document.querySelector('menu ~ button');
+  const btnReload = document.getElementById('btn-reload');
+  console.log(132, btnReload);
   if (!last.value) {
-    btn.disabled = true;
-    btn.className = 'disabled';
+    btnAdd.disabled = true;
+    btnAdd.className = 'disabled';
+    btnReload.disabled = true;
+    btnReload.className = 'disabled';
   }
 }
 
@@ -40,11 +48,21 @@ async function deleteHeaderMenu({ arr, idx }) {
 }
 
 async function saveHeaderChange(evt) {
-  evt.preventDefault();
-  await fetch('/saveHeaderChange', {
-    method: 'POST',
-    body: new FormData(headerForm),
-  });
+  try {
+    evt.preventDefault();
+    const response = await fetch('/saveHeaderChange', {
+      method: 'POST',
+      body: new FormData(headerForm),
+    });
+    const res = await response.text();
+    console.log('44', res);
+    if (res != 'ok') alert(res);
+    const btnReload = document.getElementById('btn-reload');
+    btnReload.disabled = false;
+    btnReload.className = '';
+  } catch (error) {
+    console.error('Error: ', error);
+  }
 }
 async function saveAboutChange(evt) {
   evt.preventDefault();
@@ -87,9 +105,11 @@ async function saveArticlesChange(evt) {
 
 async function reloadHeaderMenu() {
   // console.log('=in reloadHeaderMenu');
-  await fetch('/admin', {
+  const response = await fetch('/admin', {
     method: 'GET',
   });
+  const res = await response.text();
+  // alert(111, res);
   let headerMenu = document.getElementById('headerMenu');
   const lastLi = document.querySelector('menu > li:last-child');
   const lastInput = document.querySelector('menu > li:last-child input');
@@ -108,11 +128,19 @@ async function reloadHeaderMenu() {
 }
 
 async function auth(evt) {
-  evt.preventDefault();
-  const response = await fetch('/login', {
-    method: 'POST',
-    body: new FormData(loginForm),
-  });
-  console.log('resp', response);
-  if (response.ok) location.href = '/admin';
+  try {
+    evt.preventDefault();
+    const response = await fetch('/login', {
+      method: 'POST',
+      body: new FormData(loginForm),
+    });
+    if (response.ok) {
+      location.href = '/admin';
+    } else {
+      const res = await response.text();
+      alert(res);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }

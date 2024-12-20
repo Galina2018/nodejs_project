@@ -63,6 +63,10 @@ section .menu button.disabled {
   cursor: not-allowed;
 }
 
+section #btn-reload.disabled {
+  cursor: not-allowed;
+}
+
 .about,
 .services,
 .blog {
@@ -172,15 +176,19 @@ button:hover {
   top: 0;
 }
 
+.admin-header h1 {
+  margin-top: 15px;
+}
+
 .admin-header nav ul {
   display: flex;
   justify-content: center;
   list-style-type: none;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .admin-header nav ul li {
-  margin: 0 15px;
+  margin: 0 20px;
 }
 
 .admin-header nav ul li a {
@@ -188,11 +196,16 @@ button:hover {
   text-decoration: none;
 }
 
+.admin-header button {
+  margin-top: 30px;
+}
+
 .admin-content {
   padding: 20px;
 }
 
 .admin-section {
+  margin-top: 44px;
   margin-bottom: 40px;
   background-color: #fff;
   padding: 20px;
