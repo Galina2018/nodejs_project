@@ -5,8 +5,11 @@ const multer = require('multer');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const { logLineAsync } = require('./utils');
-const { hashPassword, verifyUser } = require('./funcHash');
-const crypto = require('crypto');
+const { verifyUser } = require('./funcHash');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
+const secret = 'thisshouldbeasecret';
 
 const {
   newConnectionFactory,
@@ -30,7 +33,6 @@ const pool = mysql.createPool(poolConfig);
 
 const webserver = express();
 webserver.set('view engine', 'ejs');
-// webserver.set('view cache', false);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -56,15 +58,26 @@ webserver.use(
   '/tinymce',
   express.static(path.join(__dirname, 'node_modules', 'tinymce'))
 );
+webserver.use(cookieParser());
 
-let dataMain;
-let dataHeader;
 let connection = null;
 
 function reportServerError(error, res) {
   res.status(500).end();
   logLineAsync(logFN, `[${port}] ` + error);
 }
+
+function verifyAuthToken(req, res, next) {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, function(err, decoded) {
+    if (err) {
+      return res.status(401).send('Authentication failed! Please try again :(');
+    }
+    req.userId = decoded.id;
+    next();
+  });
+}
+
 async function getDataMainPage() {
   // let dataMain;
   // let connection = null;
@@ -250,7 +263,7 @@ webserver.get('/', async (req, res) => {
   }
 });
 
-webserver.get('/admin', async (req, res) => {
+webserver.get('/admin', verifyAuthToken, async (req, res) => {
   try {
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices, dataArticles } = data;
@@ -266,6 +279,7 @@ webserver.get('/admin', async (req, res) => {
 });
 
 webserver.get('/login', (req, res) => {
+  console.log('in get');
   try {
     res.render('pages/login');
   } catch (error) {
@@ -274,44 +288,50 @@ webserver.get('/login', (req, res) => {
 });
 
 webserver.post('/login', upload.none(), async (req, res) => {
-  const isVerify = await verificationUser(req.body.username, req.body.password);
-  if (isVerify) {
-    try {
-      const token = crypto.randomBytes(60).toString('hex');
-      console.log('token', token);
-      console.log('req.body.username', req.body.username);
+  console.log('in POST');
+  try {
+    console.log('in POST try');
+    const isVerify = await verificationUser(
+      req.body.username,
+      req.body.password
+    );
+    console.log('isVerify', isVerify);
+    if (isVerify) {
       connection = await newConnectionFactory(pool, res);
-      // await modifyQueryFactory(
-      //   connection,
-      //   `
-      //     insert into sessions(login, date, token)
-      //     values (?,?)
-      // ;`,
-      //   [req.body.username, new Date(), token]
-      // );
+      let userId = await selectQueryFactory(
+        connection,
+        'select id from users where login=?',
+        [req.body.username]
+      );
+      userId = userId.map((row) => row.id);
+      const token = jwt.sign({ id: userId[0] }, secret, {
+        expiresIn: 86400,
+        // expiresIn: 10,
+      });
+      console.log('userId', userId);
       await modifyQueryFactory(
         connection,
         `
-          insert into sessions( date, token)
-          values (?,?)
-      ;`,
-        [new Date(), token]
+        insert into sessions(login, date, token)
+        values (?,?,?)
+        ;`,
+        [req.body.username, new Date(), token]
       );
-    } catch (error) {
-      reportServerError(error, res);
+      console.log('token', token);
+      res.cookie('token', token);
+      res.status(200).send('Successfully logged-in!');
+    } else {
+      res.status(401).send('Verification failed.');
     }
-    res.send('Verification is successful.');
-  } else {
-    // const hashedPassword = await hashPassword(req.body.password);
-    // saveUser({ login: req.body.username, password: hashedPassword });
-    // res.status(201).send('New user registered successfully');
-    res.status(401).send('Verification failed.');
+  } catch (error) {
+    reportServerError(error, res);
   }
 });
 
 webserver.post(
   '/saveHeaderChange',
   upload.fields([{ name: 'headerLogo', maxCount: 1 }]),
+  verifyAuthToken,
   async (req, res) => {
     let headerMenu = Object.keys(req.body)
       .map((e) => {
