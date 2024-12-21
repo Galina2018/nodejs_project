@@ -25,8 +25,8 @@ const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  password: '1234',
-  // password: '',
+  // password: '1234',
+  password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -383,6 +383,7 @@ webserver.post(
     try {
       connection = await newConnectionFactory(pool, res);
       if (headerMenuForAdd.length > 0) {
+        let idx = headerMenu.length+1;
         let i = 0;
         while (i < headerMenuForAdd.length) {
           await modifyQueryFactory(
@@ -391,9 +392,10 @@ webserver.post(
                 insert into lists(code,order_name,name)
                 values (?,?,?)
             ;`,
-            ['menu', headerMenu.length + 1, headerMenuForAdd[i]]
+            ['menu', idx, headerMenuForAdd[i]]
           );
           i++;
+          idx++;
         }
       }
     } catch (error) {
