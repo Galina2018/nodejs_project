@@ -8,6 +8,7 @@ const { logLineAsync } = require('./utils');
 const { verifyUser } = require('./funcHash');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const res = require('express/lib/response');
 
 const secret = 'thisshouldbeasecret';
 
@@ -19,14 +20,13 @@ const {
   getLastInsertedId,
   getModifiedRowsCount,
 } = require('./db_utils');
-const res = require('express/lib/response');
 
 const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  password: '1234',
-  // password: '',
+  // password: '1234',
+  password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -69,7 +69,7 @@ function reportServerError(error, res) {
 
 function verifyAuthToken(req, res, next) {
   const { token } = req.cookies;
-  jwt.verify(token, secret, function(err, decoded) {
+  jwt.verify(token, secret, function (err, decoded) {
     if (err) {
       return res.status(401).send('Authentication failed! Please try again :(');
     }
@@ -79,8 +79,6 @@ function verifyAuthToken(req, res, next) {
 }
 
 async function getDataMainPage() {
-  // let dataMain;
-  // let connection = null;
   try {
     connection = await newConnectionFactory(pool, res);
     let result = await selectQueryFactory(
@@ -184,8 +182,6 @@ async function getDataMainPage() {
       } else e.image = '';
       return e;
     });
-    // console.log('**dataArticles**', dataArticles);
-    // console.log(789, dataArticles);
     return { dataHeader, dataAbout, dataServices, dataArticles };
   } catch (error) {
     reportServerError(error, res);
@@ -194,24 +190,24 @@ async function getDataMainPage() {
   }
 }
 
-async function saveUser({ login, password }) {
-  console.log('login, password', login, password);
-  try {
-    connection = await newConnectionFactory(pool, res);
-    await modifyQueryFactory(
-      connection,
-      `
-          insert into users(login, password)
-          values (?,?)
-      ;`,
-      [login, password]
-    );
-  } catch (error) {
-    reportServerError(error, res);
-  } finally {
-    if (connection) connection.release();
-  }
-}
+// async function saveUser({ login, password }) {
+//   console.log('login, password', login, password);
+//   try {
+//     connection = await newConnectionFactory(pool, res);
+//     await modifyQueryFactory(
+//       connection,
+//       `
+//           insert into users(login, password)
+//           values (?,?)
+//       ;`,
+//       [login, password]
+//     );
+//   } catch (error) {
+//     reportServerError(error, res);
+//   } finally {
+//     if (connection) connection.release();
+//   }
+// }
 async function getUser(login) {
   try {
     connection = await newConnectionFactory(pool, res);
@@ -345,9 +341,10 @@ webserver.post(
       .filter((e) => !!e)
       .flat();
 
-    if (req.files.headerLogo) {
-      try {
-        connection = await newConnectionFactory(pool, res);
+    try {
+      connection = await newConnectionFactory(pool, res);
+
+      if (req.files.headerLogo) {
         await modifyQueryFactory(
           connection,
           `
@@ -355,15 +352,8 @@ webserver.post(
       ;`,
           [req.files.headerLogo[0].originalname]
         );
-      } catch (error) {
-        reportServerError(error, res);
-      } finally {
-        if (connection) connection.release();
       }
-    }
 
-    try {
-      connection = await newConnectionFactory(pool, res);
       for (let i = 0; i < headerMenu.length; i++) {
         await modifyQueryFactory(
           connection,
@@ -374,15 +364,9 @@ webserver.post(
           [headerMenu[i], i + 1]
         );
       }
-    } catch (error) {
-      reportServerError(error, res);
-    } finally {
-      if (connection) connection.release();
-    }
 
-    try {
-      connection = await newConnectionFactory(pool, res);
       if (headerMenuForAdd.length > 0) {
+        let idx = headerMenu.length + 1;
         let i = 0;
         while (i < headerMenuForAdd.length) {
           await modifyQueryFactory(
@@ -391,19 +375,13 @@ webserver.post(
                 insert into lists(code,order_name,name)
                 values (?,?,?)
             ;`,
-            ['menu', headerMenu.length + 1, headerMenuForAdd[i]]
+            ['menu', idx, headerMenuForAdd[i]]
           );
           i++;
+          idx++;
         }
       }
-    } catch (error) {
-      reportServerError(error, res);
-    } finally {
-      if (connection) connection.release();
-    }
 
-    try {
-      connection = await newConnectionFactory(pool, res);
       await modifyQueryFactory(
         connection,
         `

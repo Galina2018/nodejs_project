@@ -14,37 +14,41 @@ function toLoginPage() {
   location.href = '/login';
 }
 
+let arrMenuGlobal = [];
+const menu = document
+  .getElementById('headerMenu')
+  .getElementsByTagName('input');
+Array.from(menu).forEach((e, i) =>
+  arrMenuGlobal.push({ name: e.value, index: i })
+);
+
 async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
   headerMenu.innerHTML += `<li id=menu><input value='' name="headerMenu" />
   <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:'<%=i %>'})"
 >Удалить</button></li>`;
-  const last = document.querySelector('menu > li:last-child input');
-  last.value = '';
-  const btnAdd = document.querySelector('menu ~ button');
-  const btnReload = document.getElementById('btn-reload');
-  console.log(132, btnReload);
-  if (!last.value) {
-    btnAdd.disabled = true;
-    btnAdd.className = 'disabled';
-    btnReload.disabled = true;
-    btnReload.className = 'disabled';
-  }
+  arrMenuGlobal.push({ name: '', index: arrMenuGlobal.length });
 }
 
 async function deleteHeaderMenu({ arr, idx }) {
   console.log('***in deleteHeaderMenu *****', arr, idx);
   let arrMenu = arr.split(',');
-  let idxItemMenu = `menu${idx}`;
-  let liForDel = document.getElementById(idxItemMenu);
-  liForDel.remove();
-  await fetch('/deleteHeaderMenu', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ arrMenu, index: idx }),
-  });
+  let listMenu = document.getElementById('headerMenu');
+  listMenu.addEventListener('click', listHandler, false);
+  function listHandler(event) {
+    let parentLI = event.target.closest('li');
+    parentLI.remove();
+    listMenu.removeEventListener('click', listHandler, false);
+  }
+  if (Number.isInteger(+idx)) {
+    await fetch('/deleteHeaderMenu', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ arrMenu, index: idx }),
+    });
+  }
 }
 
 async function saveHeaderChange(evt) {
@@ -55,11 +59,8 @@ async function saveHeaderChange(evt) {
       body: new FormData(headerForm),
     });
     const res = await response.text();
-    console.log('44', res);
+    reloadPage();
     if (res != 'ok') alert(res);
-    const btnReload = document.getElementById('btn-reload');
-    btnReload.disabled = false;
-    btnReload.className = '';
   } catch (error) {
     console.error('Error: ', error);
   }
@@ -103,28 +104,13 @@ async function saveArticlesChange(evt) {
   });
 }
 
-async function reloadHeaderMenu() {
-  // console.log('=in reloadHeaderMenu');
-  const response = await fetch('/admin', {
-    method: 'GET',
-  });
-  const res = await response.text();
-  // alert(111, res);
-  let headerMenu = document.getElementById('headerMenu');
-  const lastLi = document.querySelector('menu > li:last-child');
-  const lastInput = document.querySelector('menu > li:last-child input');
-  const lastIindex = document.querySelectorAll('menu > li');
-  const idx = lastIindex.length - 1;
-  const lastInputMemory = lastInput.value;
-  lastLi.remove();
-  headerMenu.innerHTML += `<li id='menu${idx}'><input value=${lastInputMemory} name='headerMenu${idx}' />
-  <button type="button" onclick="deleteHeaderMenu({arr:'<%= dataHeader[0].list %>', idx:${idx}})"
-  >Удалить</button></li>`;
-  const btnAdd = document.querySelector('menu ~ button');
-  if (lastInput.value) {
-    btnAdd.disabled = false;
-    btnAdd.className = '';
-  }
+async function reloadPage() {
+  // console.log('=in reloadPage');
+  // const response = await fetch('/admin', {
+  //   method: 'GET',
+  // });
+  // const res = await response.text();
+  location.reload();
 }
 
 async function auth(evt) {
