@@ -6,6 +6,8 @@ const serviceForm = document.getElementById('serviceForm');
 serviceForm?.addEventListener('submit', saveServiceChange);
 const articleForm = document.getElementById('articleForm');
 articleForm?.addEventListener('submit', saveArticlesChange);
+const seoForm = document.getElementById('seoForm');
+seoForm?.addEventListener('submit', saveSeoChange);
 
 const loginForm = document.getElementById('loginForm');
 loginForm?.addEventListener('submit', auth);
@@ -15,12 +17,13 @@ function toLoginPage() {
 }
 
 let arrMenuGlobal = [];
-const menu = document
-  .getElementById('headerMenu')
-  .getElementsByTagName('input');
-Array.from(menu).forEach((e, i) =>
-  arrMenuGlobal.push({ name: e.value, index: i })
-);
+const headerMenu = document.getElementById('headerMenu');
+if (headerMenu) {
+  headerMenu.getElementsByTagName('input');
+  Array.from(headerMenu)?.forEach((e, i) =>
+    arrMenuGlobal.push({ name: e.value, index: i })
+  );
+}
 
 async function addHeaderMenu() {
   let headerMenu = document.getElementById('headerMenu');
@@ -49,6 +52,11 @@ async function deleteHeaderMenu({ arr, idx }) {
       body: JSON.stringify({ arrMenu, index: idx }),
     });
   }
+}
+
+function toAboutPage() {
+  console.log('in toAboutPage');
+  location.href = '/about';
 }
 
 async function saveHeaderChange(evt) {
@@ -89,7 +97,7 @@ async function saveServiceChange(evt) {
 }
 async function saveArticlesChange(evt) {
   evt.preventDefault();
-  console.log('in saveArticlesChange');
+  // console.log('in saveArticlesChange');
   const articleNumber = evt.submitter.name.slice(-1);
   let data = Array.from(new FormData(articleForm));
   let rgxp = new RegExp(articleNumber);
@@ -102,6 +110,19 @@ async function saveArticlesChange(evt) {
     method: 'POST',
     body: dataArticles,
   });
+}
+
+async function saveSeoChange(evt) {
+  evt.preventDefault();
+  let data = Array.from(new FormData(seoForm));
+  console.log('in saveSeoChange data', data);
+  console.log('in saveSeoChange', new FormData(seoForm));
+  const response = await fetch('/saveSeoChange', {
+    method: 'POST',
+    body: new FormData(seoForm),
+  });
+  const res = await response.text();
+  console.log('res', res);
 }
 
 async function reloadPage() {

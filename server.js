@@ -83,7 +83,7 @@ async function getDataMainPage() {
     connection = await newConnectionFactory(pool, res);
     let result = await selectQueryFactory(
       connection,
-      'select content from indpages',
+      'select content from pages',
       []
     );
     result = result.map((row) => row.content);
@@ -99,6 +99,7 @@ async function getDataMainPage() {
       list: row.list,
       text: row.text,
     }));
+
     let logo = await selectQueryFactory(
       connection,
       'select url from images where code=?',
@@ -157,6 +158,7 @@ async function getDataMainPage() {
       code: row.code,
       url: row.url,
     }));
+
     dataServices = dataServices.map((e) => {
       const el = images.find((img) => img.code === e.image);
       if (el) {
@@ -164,7 +166,6 @@ async function getDataMainPage() {
       } else e.image = '';
       return e;
     });
-
     let dataArticles = await selectQueryFactory(
       connection,
       `select name, text, image from group_section where content=10 and code='articles' order by code_order`,
@@ -182,7 +183,19 @@ async function getDataMainPage() {
       } else e.image = '';
       return e;
     });
-    return { dataHeader, dataAbout, dataServices, dataArticles };
+    let dataSeo = await selectQueryFactory(
+      connection,
+      `select url_code, content, title, metakeywords, metadescription from pages`,
+      []
+    );
+    dataSeo = dataSeo.map((row) => ({
+      url: row.url_code,
+      content: row.content,
+      title: row.title,
+      metakeywords: row.metakeywords,
+      metadescription: row.metadescription,
+    }));
+    return { dataHeader, dataAbout, dataServices, dataArticles, dataSeo };
   } catch (error) {
     reportServerError(error, res);
   } finally {
@@ -247,12 +260,13 @@ async function verificationUser(login, password) {
 webserver.get('/', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout, dataServices, dataArticles } = data;
+    const { dataHeader, dataAbout, dataServices, dataArticles, dataSeo } = data;
     res.render('pages/main', {
       dataHeader,
       dataAbout,
       dataServices,
       dataArticles,
+      dataSeo,
     });
   } catch (error) {
     reportServerError(error, res);
@@ -262,12 +276,26 @@ webserver.get('/', async (req, res) => {
 webserver.get('/admin', verifyAuthToken, async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout, dataServices, dataArticles } = data;
+    const { dataHeader, dataAbout, dataServices, dataArticles, dataSeo } = data;
     res.render('pages/admin', {
       dataHeader,
       dataAbout,
       dataServices,
       dataArticles,
+      dataSeo,
+    });
+  } catch (error) {
+    reportServerError(error, res);
+  }
+});
+
+webserver.get('/about', verifyAuthToken, async (req, res) => {
+  try {
+    let data = await getDataMainPage();
+    const { dataHeader, dataAbout } = data;
+    res.render('pages/about', {
+      dataHeader,
+      dataAbout,
     });
   } catch (error) {
     reportServerError(error, res);
@@ -284,27 +312,22 @@ webserver.get('/login', (req, res) => {
 });
 
 webserver.post('/login', upload.none(), async (req, res) => {
-  console.log('in POST');
   try {
-    console.log('in POST try');
     const isVerify = await verificationUser(
       req.body.username,
       req.body.password
     );
-    console.log('isVerify', isVerify);
     if (isVerify) {
       connection = await newConnectionFactory(pool, res);
-      let userId = await selectQueryFactory(
+      let userId = await selectQueryRowFactory(
         connection,
         'select id from users where login=?',
         [req.body.username]
       );
-      userId = userId.map((row) => row.id);
-      const token = jwt.sign({ id: userId[0] }, secret, {
+      const token = jwt.sign({ id: userId.id }, secret, {
         expiresIn: 86400,
         // expiresIn: 10,
       });
-      console.log('userId', userId);
       await modifyQueryFactory(
         connection,
         `
@@ -313,7 +336,6 @@ webserver.post('/login', upload.none(), async (req, res) => {
         ;`,
         [req.body.username, new Date(), token]
       );
-      console.log('token', token);
       res.cookie('token', token);
       res.status(200).send('Successfully logged-in!');
     } else {
@@ -527,5 +549,51 @@ webserver.post(
     res.send('ok');
   }
 );
+
+webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
+  const body = req.body;
+  let keys = Object.keys(body);
+  keys = keys.map((e) => e.slice(-1));
+  keys = [...new Set(keys)];
+  
+  let entries = Object.entries(body);
+  const dataSeo = keys.map((e) => {
+    let arr = [];
+    let rgxp = new RegExp(e);
+    entries.forEach(([k, val]) => {
+      if (k.match(rgxp)) {
+        arr.push([k.slice(0,-1), val]);
+      }
+    });
+    arr.unshift(['content', (+e + 1) * 10]);
+    return Object.fromEntries(arr);
+  });
+  // console.log('dataSeo', dataSeo);
+
+  try {
+    connection = await newConnectionFactory(pool, res);
+
+    dataSeo.forEach(async (e) => {
+      await modifyQueryFactory(
+        connection,
+        `
+              update pages set title=?, metakeywords=?, metadescription=? where content=?
+          ;`,
+        [
+          e.seoTitle,
+          e.seoMetakeywords,
+          e.seoMetadescription,
+          e.content,
+        ]
+      );
+    });
+
+  } catch (error) {
+    reportServerError(error, res);
+  } finally {
+    if (connection) connection.release();
+  }
+  res.send('ok');
+});
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));

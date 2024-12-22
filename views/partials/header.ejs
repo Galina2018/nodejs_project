@@ -1,0 +1,13 @@
+<div>
+  <img src="<%=dataHeader[0].image %>" width="70px" alt="Логотип" />
+</div>
+<nav class="menu">
+  <ul>
+    <% for(var i=0; i < dataHeader[0].list.length; i++) {%>
+    <li><%= dataHeader[0].list[i] %></li>
+    <%} %>
+  </ul>
+</nav>
+<div class="phone">
+  <p>Телефон: <%= dataHeader[0].text %></p>
+</div>

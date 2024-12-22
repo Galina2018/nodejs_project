@@ -58,13 +58,14 @@ section .menu button {
   margin-bottom: 20px;
 }
 
-section .menu button.disabled {
-  background-color: #555;
-  cursor: not-allowed;
+section h3 {
+  margin-bottom: 10px;
 }
 
-section #btn-reload.disabled {
-  cursor: not-allowed;
+.seo {
+  margin-top: 15px;
+  color: white;
+  text-decoration: none;
 }
 
 .about,
@@ -86,8 +87,22 @@ section #btn-reload.disabled {
   object-fit: cover;
 }
 
+.about h2 {
+  margin-bottom: 15px;
+}
+
 .about .text {
-  max-width: 500px;
+  max-width: 660px;
+}
+
+.about .text .about-text {
+  margin-bottom: 20px;
+  height: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
 }
 
 .row {

@@ -21,12 +21,14 @@
           <li><a href="#blog">Блог</a></li>
         </ul>
       </nav>
+      <a class="seo" href="#seo">SEO</a>
       <button class="admin-button" onclick="toLoginPage()">Выйти</button>
     </header>
 
     <div class="admin-content">
       <!-- Menu Section -->
-      <section class="admin-section" id="header">
+      <a id="header"></a><br />
+      <section class="admin-section">
         <h2>Редактирование раздела "Шапка"</h2>
         <form id="headerForm" enctype="multipart/form-data">
           <label for="headerLogo">Логотип</label>
@@ -80,7 +82,8 @@
       </section>
 
       <!-- About Section -->
-      <section class="admin-section" id="about">
+      <a id="about"></a><br />
+      <section class="admin-section">
         <h2>Редактирование раздела "Обо мне"</h2>
         <form id="aboutForm" enctype="multipart/form-data">
           <label for="aboutTitle">Заголовок</label>
@@ -112,7 +115,8 @@
       </section>
 
       <!-- Services Section -->
-      <section class="admin-section" id="services">
+      <a id="services"></a><br />
+      <section class="admin-section">
         <h2>Редактирование раздела "Услуги"</h2>
         <div class="service-item">
           <form id="serviceForm" enctype="multipart/form-data">
@@ -160,7 +164,8 @@
       </section>
 
       <!-- Blog Section -->
-      <section class="admin-section" id="blog">
+      <a id="blog"></a><br />
+      <section class="admin-section">
         <h2>Редактирование раздела "Блог"</h2>
         <div class="article-item">
           <form id="articleForm" enctype="multipart/form-data">
@@ -203,6 +208,39 @@
             <%} %>
           </form>
         </div>
+      </section>
+      <section class="admin-section" id="seo">
+        <h2>Редактирование SEO-реквизитов</h2>
+        <form id="seoForm" enctype="multipart/form-data">
+          <% for (let i=0; i < dataSeo.length; i++) {%>
+          <h3 name="seoUrl<%=i%>">Страница /<%=dataSeo[i].url%></h3>
+          <label for="seoTitle<%=i%>">title</label>
+          <input
+            type="text"
+            id="seoTitle"
+            name="seoTitle<%=i%>"
+            value="<%= dataSeo[i].title%>"
+            required
+          />
+          <label for="seoMetakeywords<%=i%>">metakeywords</label>
+          <input
+            type="text"
+            id="seoMetakeywords"
+            name="seoMetakeywords<%=i%>"
+            value="<%= dataSeo[i].metakeywords%>"
+            required
+          />
+          <label for="seoMetadescription<%=i%>">metadescription</label>
+          <input
+            type="text"
+            id="seoMetadescription"
+            name="seoMetadescription<%=i%>"
+            value="<%= dataSeo[i].metadescription%>"
+            required
+          />
+          <%} %>
+          <button type="submit">Сохранить</button>
+        </form>
       </section>
     </div>
     <script src="./script.js"></script>
