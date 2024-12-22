@@ -158,7 +158,7 @@ async function getDataMainPage() {
       code: row.code,
       url: row.url,
     }));
-    
+
     dataServices = dataServices.map((e) => {
       const el = images.find((img) => img.code === e.image);
       if (el) {
@@ -551,40 +551,43 @@ webserver.post(
 );
 
 webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
-  console.log(555, req.body)
-  console.log(555, req.body.length)
+  const body = req.body;
+  let keys = Object.keys(body);
+  keys = keys.map((e) => e.slice(-1));
+  keys = [...new Set(keys)];
+  
+  let entries = Object.entries(body);
+  const dataSeo = keys.map((e) => {
+    let arr = [];
+    let rgxp = new RegExp(e);
+    entries.forEach(([k, val]) => {
+      if (k.match(rgxp)) {
+        arr.push([k.slice(0,-1), val]);
+      }
+    });
+    arr.unshift(['content', (+e + 1) * 10]);
+    return Object.fromEntries(arr);
+  });
+  // console.log('dataSeo', dataSeo);
+
   try {
     connection = await newConnectionFactory(pool, res);
-    console.log(
-      123,
-      req.body.seoTitle,
-      req.body.seoMetakeywords,
-      req.body.seoMetadescription
-    );
-    // await modifyQueryFactory(
-    //   connection,
-    //   `
-    //         update pages set title=?, metakeywords=?, metadescription=? where url_code=?
-    //     ;`,
-    //   [
-    //     req.body.seoTitle,
-    //     req.body.seoMetakeywords,
-    //     req.body.seoMetadescription,
-    //     'main',
-    //   ]
-    // );
-    // await modifyQueryFactory(
-    //   connection,
-    //   `
-    //         update pages set title=?, metakeywords=?, metadescription=? where url_code=?
-    //     ;`,
-    //   [
-    //     req.body.seoTitle,
-    //     req.body.seoMetakeywords,
-    //     req.body.seoMetadescription,
-    //     'about',
-    //   ]
-    // );
+
+    dataSeo.forEach(async (e) => {
+      await modifyQueryFactory(
+        connection,
+        `
+              update pages set title=?, metakeywords=?, metadescription=? where content=?
+          ;`,
+        [
+          e.seoTitle,
+          e.seoMetakeywords,
+          e.seoMetadescription,
+          e.content,
+        ]
+      );
+    });
+
   } catch (error) {
     reportServerError(error, res);
   } finally {
