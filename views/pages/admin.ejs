@@ -31,13 +31,18 @@
       <section class="admin-section">
         <h2>Редактирование раздела "Шапка"</h2>
         <form id="headerForm" enctype="multipart/form-data">
-          <label for="headerLogo">Логотип</label>
+          <div class="row">
+            <label for="headerLogo">Логотип</label>
+            <p><%= dataHeader[0].image%></p>
+            <p><img src="#" id="previewHeaderLogo"></p>
+          </div>
           <input
             type="file"
             id="headerLogo"
             name="headerLogo"
             accept=".jpg,.jpeg"
             value="<%=dataHeader[0].image %>"
+            onchange="loadFile(event, 'previewHeaderLogo')"
           />
           <div>
             <label for="headerMenu">Пункты меню</label>
@@ -102,12 +107,15 @@
           <div class="row">
             <label for="aboutFoto">Изображение (URL)</label>
             <p id="aboutImage" name="aboutImage"><%= dataAbout[0].image%></p>
+            <p><img src="#" id="previewAboutFoto" ></p>
           </div>
           <input
             type="file"
+            id="aboutFoto"
             name="aboutFoto"
             accept=".jpg,.jpeg"
             value="<%=dataAbout[0].image %>"
+            onchange="loadFile(event,'previewAboutFoto')"
           />
 
           <button type="submit">Сохранить</button>
@@ -143,6 +151,7 @@
             <div class="row">
               <label for="serviceImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataServices[i].image %></p>
+              <p><img src="#" id="previewServiceImage<%=i+1%>" ></p>
             </div>
             <input
               type="file"
@@ -150,6 +159,7 @@
               name="serviceImage"
               accept=".jpg,.jpeg"
               value=" <%= dataServices[i].image %>"
+              onchange="loadFile(event, 'previewServiceImage<%=i+1%>')"
             />
             <button
               type="submit"
@@ -192,11 +202,15 @@
             <div class="row">
               <label for="articleImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataArticles[i].image %></p>
+              <p><img src="#" id="previewArticleImage<%=i+1%>" ></p>
             </div>
             <input
               type="file"
               id="articleImage<%=i+1%>"
-              name="articleImage<%=i+1%>"
+              name="articleImage"
+              accept=".jpg,.jpeg"
+              value=" <%= dataArticles[i].image %>"
+              onchange="loadFile(event, 'previewArticleImage<%=i+1%>')"
             />
             <button
               type="submit"

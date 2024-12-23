@@ -25,8 +25,8 @@ const poolConfig = {
   connectionLimit: 2,
   host: 'localhost',
   user: 'root',
-  // password: '1234',
-  password: '',
+  password: '1234',
+  // password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -69,7 +69,7 @@ function reportServerError(error, res) {
 
 function verifyAuthToken(req, res, next) {
   const { token } = req.cookies;
-  jwt.verify(token, secret, function (err, decoded) {
+  jwt.verify(token, secret, function(err, decoded) {
     if (err) {
       return res.status(401).send('Authentication failed! Please try again :(');
     }
@@ -555,14 +555,14 @@ webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
   let keys = Object.keys(body);
   keys = keys.map((e) => e.slice(-1));
   keys = [...new Set(keys)];
-  
+
   let entries = Object.entries(body);
   const dataSeo = keys.map((e) => {
     let arr = [];
     let rgxp = new RegExp(e);
     entries.forEach(([k, val]) => {
       if (k.match(rgxp)) {
-        arr.push([k.slice(0,-1), val]);
+        arr.push([k.slice(0, -1), val]);
       }
     });
     arr.unshift(['content', (+e + 1) * 10]);
@@ -579,15 +579,9 @@ webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
         `
               update pages set title=?, metakeywords=?, metadescription=? where content=?
           ;`,
-        [
-          e.seoTitle,
-          e.seoMetakeywords,
-          e.seoMetadescription,
-          e.content,
-        ]
+        [e.seoTitle, e.seoMetakeywords, e.seoMetadescription, e.content]
       );
     });
-
   } catch (error) {
     reportServerError(error, res);
   } finally {
