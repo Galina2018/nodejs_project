@@ -148,15 +148,11 @@ async function saveArticlesChange(evt) {
 
 async function saveSeoChange(evt) {
   evt.preventDefault();
-  let data = Array.from(new FormData(seoForm));
-  console.log('in saveSeoChange data', data);
-  console.log('in saveSeoChange', new FormData(seoForm));
   const response = await fetch('/saveSeoChange', {
     method: 'POST',
     body: new FormData(seoForm),
   });
   const res = await response.text();
-  console.log('res', res);
 }
 
 async function reloadPage() {
