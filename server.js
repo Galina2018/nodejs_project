@@ -22,7 +22,7 @@ const {
 } = require('./db_utils');
 
 const poolConfig = {
-  connectionLimit: 2,
+  connectionLimit: 10,
   host: 'localhost',
   user: 'root',
   password: '1234',
@@ -68,10 +68,16 @@ function reportServerError(error, res) {
 }
 
 function verifyAuthToken(req, res, next) {
+  console.log('in verifyAuthToken');
   const { token } = req.cookies;
   jwt.verify(token, secret, function(err, decoded) {
     if (err) {
-      return res.status(401).send('Authentication failed! Please try again :(');
+      return (
+        res
+          .status(401)
+          // .send('Authentication failed! Please try again :(')
+          .redirect('/login')
+      );
     }
     req.userId = decoded.id;
     next();
@@ -87,7 +93,6 @@ async function getDataMainPage() {
       []
     );
     result = result.map((row) => row.content);
-
     let dataHeader = await selectQueryFactory(
       connection,
       'select * from indsection where content=?',
@@ -275,6 +280,7 @@ webserver.get('/', async (req, res) => {
 
 webserver.get('/admin', verifyAuthToken, async (req, res) => {
   try {
+    console.log('in /admin');
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices, dataArticles, dataSeo } = data;
     res.render('pages/admin', {
@@ -289,7 +295,7 @@ webserver.get('/admin', verifyAuthToken, async (req, res) => {
   }
 });
 
-webserver.get('/about', verifyAuthToken, async (req, res) => {
+webserver.get('/about', async (req, res) => {
   try {
     let data = await getDataMainPage();
     const { dataHeader, dataAbout } = data;
@@ -313,6 +319,7 @@ webserver.get('/login', (req, res) => {
 
 webserver.post('/login', upload.none(), async (req, res) => {
   try {
+    console.log('in post login', req.body);
     const isVerify = await verificationUser(
       req.body.username,
       req.body.password
@@ -568,7 +575,6 @@ webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
     arr.unshift(['content', (+e + 1) * 10]);
     return Object.fromEntries(arr);
   });
-  // console.log('dataSeo', dataSeo);
 
   try {
     connection = await newConnectionFactory(pool, res);
