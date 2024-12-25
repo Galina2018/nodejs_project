@@ -53,7 +53,7 @@ const logFN = path.join(__dirname, '_server.log');
 webserver.use(bodyParser.text({}));
 webserver.use(bodyParser.json({}));
 webserver.use(express.urlencoded({ extended: true }));
-webserver.use(express.static(path.resolve(__dirname, 'public')));
+// webserver.use(express.static(path.resolve(__dirname, 'public')));
 webserver.use(
   '/tinymce',
   express.static(path.join(__dirname, 'node_modules', 'tinymce'))
