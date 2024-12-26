@@ -34,7 +34,7 @@
           <div class="row">
             <label for="headerLogo">Логотип</label>
             <p><%= dataHeader[0].image%></p>
-            <p><img src="#" id="previewHeaderLogo"></p>
+            <p><img src="#" id="previewHeaderLogo" /></p>
           </div>
           <input
             type="file"
@@ -107,7 +107,7 @@
           <div class="row">
             <label for="aboutFoto">Изображение (URL)</label>
             <p id="aboutImage" name="aboutImage"><%= dataAbout[0].image%></p>
-            <p><img src="#" id="previewAboutFoto" ></p>
+            <p><img src="#" id="previewAboutFoto" /></p>
           </div>
           <input
             type="file"
@@ -151,12 +151,12 @@
             <div class="row">
               <label for="serviceImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataServices[i].image %></p>
-              <p><img src="#" id="previewServiceImage<%=i+1%>" ></p>
+              <p><img src="#" id="previewServiceImage<%=i+1%>" /></p>
             </div>
             <input
               type="file"
               id="serviceImage<%=i+1%>"
-              name="serviceImage"
+              name="serviceImage<%=i+1%>"
               accept=".jpg,.jpeg"
               value=" <%= dataServices[i].image %>"
               onchange="loadFile(event, 'previewServiceImage<%=i+1%>')"
@@ -202,12 +202,12 @@
             <div class="row">
               <label for="articleImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataArticles[i].image %></p>
-              <p><img src="#" id="previewArticleImage<%=i+1%>" ></p>
+              <p><img src="#" id="previewArticleImage<%=i+1%>" /></p>
             </div>
             <input
               type="file"
               id="articleImage<%=i+1%>"
-              name="articleImage"
+              name="articleImage<%=i+1%>"
               accept=".jpg,.jpeg"
               value=" <%= dataArticles[i].image %>"
               onchange="loadFile(event, 'previewArticleImage<%=i+1%>')"

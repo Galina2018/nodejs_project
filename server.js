@@ -295,7 +295,7 @@ webserver.get('/login', (req, res) => {
 
 webserver.post('/login', upload.none(), async (req, res) => {
   try {
-    console.log('in post login', req.body);
+    // console.log('in post login');
     const isVerify = await verificationUser(
       req.body.username,
       req.body.password
@@ -356,7 +356,7 @@ webserver.post(
           `
           update images set url=? where code='logo'
       ;`,
-          [req.files.headerLogo[0].originalname]
+          [`/${req.files.headerLogo[0].originalname}`]
         );
       }
 
@@ -437,7 +437,7 @@ webserver.post(
           `
       update images set url=? where code='foto'
   ;`,
-          [req.files.aboutFoto[0].originalname]
+          [`/${req.files.aboutFoto[0].originalname}`]
         );
       }
       await modifyQueryFactory(
@@ -476,7 +476,7 @@ webserver.post(
           `
       update images set url=? where code=?
   ;`,
-          [req.files.serviceImage[0].originalname, imageCode]
+          [`/${req.files.serviceImage[0].originalname}`, imageCode]
         );
       }
       await modifyQueryFactory(
@@ -522,7 +522,7 @@ webserver.post(
           `
       update images set url=? where code=?
   ;`,
-          [req.files.articleImage[0].originalname, imageCode]
+          [`/${req.files.articleImage[0].originalname}`, imageCode]
         );
       }
     } catch (error) {
