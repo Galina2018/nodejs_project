@@ -17,8 +17,6 @@ const {
   selectQueryFactory,
   selectQueryRowFactory,
   modifyQueryFactory,
-  getLastInsertedId,
-  getModifiedRowsCount,
 } = require('./db_utils');
 
 const poolConfig = {
@@ -73,12 +71,7 @@ function verifyAuthToken(req, res, next) {
   const { token } = req.cookies;
   jwt.verify(token, secret, function(err, decoded) {
     if (err) {
-      return (
-        res
-          .status(401)
-          // .send('Authentication failed! Please try again :(')
-          .redirect('/login')
-      );
+      return res.status(401).redirect('/login');
     }
     req.userId = decoded.id;
     next();
@@ -209,24 +202,6 @@ async function getDataMainPage() {
   }
 }
 
-// async function saveUser({ login, password }) {
-//   console.log('login, password', login, password);
-//   try {
-//     connection = await newConnectionFactory(pool, res);
-//     await modifyQueryFactory(
-//       connection,
-//       `
-//           insert into users(login, password)
-//           values (?,?)
-//       ;`,
-//       [login, password]
-//     );
-//   } catch (error) {
-//     reportServerError(error, res);
-//   } finally {
-//     if (connection) connection.release();
-//   }
-// }
 async function getUser(login) {
   try {
     connection = await newConnectionFactory(pool, res);
@@ -333,7 +308,8 @@ webserver.post('/login', upload.none(), async (req, res) => {
         [req.body.username]
       );
       const token = jwt.sign({ id: userId.id }, secret, {
-        expiresIn: 86400,
+        // expiresIn: 86400,
+        expiresIn: 3600,
         // expiresIn: 10,
       });
       await modifyQueryFactory(

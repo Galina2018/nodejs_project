@@ -51,33 +51,9 @@ function modifyQueryFactory(connection, queryText, queryValues) {
   });
 }
 
-// возвращает id последней добавленной строки
-function getLastInsertedId(connection) {
-  return new Promise((resolve, reject) => {
-    selectQueryFactory(connection, 'select LAST_INSERT_ID() as last_id')
-      .then((rows) => {
-        resolve(rows[0].last_id);
-      })
-      .catch((err) => reject(err));
-  });
-}
-
-// возвращает количество изменённых последним запросом строк
-function getModifiedRowsCount(connection) {
-  return new Promise((resolve, reject) => {
-    selectQueryFactory(connection, 'select row_count() as row_count')
-      .then((rows) => {
-        resolve(rows[0].row_count);
-      })
-      .catch((err) => reject(err));
-  });
-}
-
 module.exports = {
   newConnectionFactory,
   selectQueryFactory,
   selectQueryRowFactory,
   modifyQueryFactory,
-  getLastInsertedId,
-  getModifiedRowsCount,
 };
