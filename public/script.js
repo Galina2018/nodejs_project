@@ -18,25 +18,25 @@ function toLoginPage() {
 
 const headerLogo = document.getElementById('headerLogo');
 const previewHeaderLogo = document.getElementById('previewHeaderLogo');
-if (headerLogo.defaultValue) {
+if (headerLogo?.defaultValue) {
   previewHeaderLogo.src = `${headerLogo.defaultValue}`;
 }
 const aboutFoto = document.getElementById('aboutFoto');
 const previewAboutFoto = document.getElementById('previewAboutFoto');
-if (aboutFoto.defaultValue) {
+if (aboutFoto?.defaultValue) {
   previewAboutFoto.src = `${aboutFoto.defaultValue}`;
 }
 for (let i = 1; i <= 3; i++) {
   let inputImage = document.getElementById(`serviceImage${i}`);
   let previewImage = document.getElementById(`previewServiceImage${i}`);
-  if (inputImage.defaultValue) {
+  if (inputImage?.defaultValue) {
     previewImage.src = `${inputImage.defaultValue}`;
   }
 }
 for (let i = 1; i <= 3; i++) {
   let inputImage = document.getElementById(`articleImage${i}`);
   let previewImage = document.getElementById(`previewArticleImage${i}`);
-  if (inputImage.defaultValue) {
+  if (inputImage?.defaultValue) {
     previewImage.src = `${inputImage.defaultValue}`;
   }
 }
