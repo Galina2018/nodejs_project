@@ -4,7 +4,7 @@
 <nav class="menu">
   <ul>
     <% for(var i=0; i < dataHeader[0].list.length; i++) {%>
-    <li><%= dataHeader[0].list[i] %></li>
+    <li onclick="toMainPage('<%= i %>')"><a href="#<%= dataHeader[0].menuAnchor[i] %>"><%= dataHeader[0].list[i] %></a></li>
     <%} %>
   </ul>
 </nav>

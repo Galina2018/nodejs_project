@@ -15,6 +15,9 @@ loginForm?.addEventListener('submit', auth);
 function toLoginPage() {
   location.href = '/login';
 }
+function toMainPage(i) {
+  if (i == 0) location.href = '/';
+}
 
 const headerLogo = document.getElementById('headerLogo');
 const previewHeaderLogo = document.getElementById('previewHeaderLogo');

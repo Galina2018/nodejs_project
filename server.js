@@ -109,6 +109,14 @@ async function getDataMainPage() {
     }));
     dataHeader[0].image = logo[0].url;
 
+    let menuAnchor = await selectQueryFactory(
+      connection,
+      `select anchor from lists where code=?`,
+      [dataHeader[0].list]
+    );
+    menuAnchor = menuAnchor.map((row) => row.anchor);
+    dataHeader[0].menuAnchor = menuAnchor;
+
     let menuHeader = await selectQueryFactory(
       connection,
       'select name from lists where code=?',
