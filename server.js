@@ -9,6 +9,7 @@ const { verifyUser } = require('./funcHash');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const res = require('express/lib/response');
+const mysqldump = require('mysqldump');
 
 const secret = 'thisshouldbeasecret';
 
@@ -579,6 +580,20 @@ webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
     if (connection) connection.release();
   }
   res.send('ok');
+});
+
+webserver.post('/dump', async (req, res) => {
+  const dumpFileName = `${Math.round(Date.now() / 1000)}.dump.sql`;
+  await mysqldump({
+    connection: {
+      host: 'localhost',
+      user: 'root',
+      password: '1234',
+      database: 'project_db',
+    },
+    dumpToFile: dumpFileName,
+  });
+  res.send('Backup completed successfully.');
 });
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));
