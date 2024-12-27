@@ -184,3 +184,7 @@ async function auth(evt) {
     console.error(error);
   }
 }
+
+function dumpDB() {
+  fetch('/dump', { method: 'POST' });
+}
