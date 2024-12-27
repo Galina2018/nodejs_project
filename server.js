@@ -35,7 +35,7 @@ webserver.set('view engine', 'ejs');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'public'));
+    cb(null, path.join(__dirname, 'public/images'));
   },
   filename: (req, file, cb) => {
     file.originalname = Buffer.from(file.originalname, 'latin1').toString(
@@ -68,7 +68,7 @@ function reportServerError(error, res) {
 }
 
 function verifyAuthToken(req, res, next) {
-  console.log('in verifyAuthToken');
+  // console.log('in verifyAuthToken');
   const { token } = req.cookies;
   jwt.verify(token, secret, function(err, decoded) {
     if (err) {
@@ -265,7 +265,7 @@ webserver.get('/', async (req, res) => {
 
 webserver.get('/admin', verifyAuthToken, async (req, res) => {
   try {
-    console.log('in /admin');
+    // console.log('in /admin');
     let data = await getDataMainPage();
     const { dataHeader, dataAbout, dataServices, dataArticles, dataSeo } = data;
     res.render('pages/admin', {
@@ -294,7 +294,7 @@ webserver.get('/about', async (req, res) => {
 });
 
 webserver.get('/login', (req, res) => {
-  console.log('in get');
+  // console.log('in get');
   try {
     res.render('pages/login');
   } catch (error) {
@@ -413,7 +413,7 @@ webserver.post(
   }
 );
 
-webserver.post('/deleteHeaderMenu', async (req, res) => {
+webserver.post('/deleteHeaderMenu', verifyAuthToken, async (req, res) => {
   try {
     connection = await newConnectionFactory(pool, res);
     const { arrMenu, index } = req.body;
@@ -437,6 +437,7 @@ webserver.post('/deleteHeaderMenu', async (req, res) => {
 webserver.post(
   '/saveAboutChange',
   upload.fields([{ name: 'aboutFoto', maxCount: 1 }]),
+  verifyAuthToken,
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
@@ -468,6 +469,7 @@ webserver.post(
 webserver.post(
   '/saveServiceChange/:serviceNumber',
   upload.fields([{ name: `serviceImage`, maxCount: 1 }]),
+  verifyAuthToken,
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
@@ -507,6 +509,7 @@ webserver.post(
 webserver.post(
   '/saveArticlesChange/:articleNumber',
   upload.fields([{ name: `articleImage`, maxCount: 1 }]),
+  verifyAuthToken,
   async (req, res) => {
     try {
       connection = await newConnectionFactory(pool, res);
@@ -543,46 +546,51 @@ webserver.post(
   }
 );
 
-webserver.post('/saveSeoChange', upload.none(), async (req, res) => {
-  const body = req.body;
-  let keys = Object.keys(body);
-  keys = keys.map((e) => e.slice(-1));
-  keys = [...new Set(keys)];
+webserver.post(
+  '/saveSeoChange',
+  upload.none(),
+  verifyAuthToken,
+  async (req, res) => {
+    const body = req.body;
+    let keys = Object.keys(body);
+    keys = keys.map((e) => e.slice(-1));
+    keys = [...new Set(keys)];
 
-  let entries = Object.entries(body);
-  const dataSeo = keys.map((e) => {
-    let arr = [];
-    let rgxp = new RegExp(e);
-    entries.forEach(([k, val]) => {
-      if (k.match(rgxp)) {
-        arr.push([k.slice(0, -1), val]);
-      }
+    let entries = Object.entries(body);
+    const dataSeo = keys.map((e) => {
+      let arr = [];
+      let rgxp = new RegExp(e);
+      entries.forEach(([k, val]) => {
+        if (k.match(rgxp)) {
+          arr.push([k.slice(0, -1), val]);
+        }
+      });
+      arr.unshift(['content', (+e + 1) * 10]);
+      return Object.fromEntries(arr);
     });
-    arr.unshift(['content', (+e + 1) * 10]);
-    return Object.fromEntries(arr);
-  });
 
-  try {
-    connection = await newConnectionFactory(pool, res);
+    try {
+      connection = await newConnectionFactory(pool, res);
 
-    dataSeo.forEach(async (e) => {
-      await modifyQueryFactory(
-        connection,
-        `
+      dataSeo.forEach(async (e) => {
+        await modifyQueryFactory(
+          connection,
+          `
               update pages set title=?, metakeywords=?, metadescription=? where content=?
           ;`,
-        [e.seoTitle, e.seoMetakeywords, e.seoMetadescription, e.content]
-      );
-    });
-  } catch (error) {
-    reportServerError(error, res);
-  } finally {
-    if (connection) connection.release();
+          [e.seoTitle, e.seoMetakeywords, e.seoMetadescription, e.content]
+        );
+      });
+    } catch (error) {
+      reportServerError(error, res);
+    } finally {
+      if (connection) connection.release();
+    }
+    res.send('ok');
   }
-  res.send('ok');
-});
+);
 
-webserver.post('/dump', async (req, res) => {
+webserver.post('/dump', verifyAuthToken, async (req, res) => {
   const dumpFileName = `${Math.round(Date.now() / 1000)}.dump.sql`;
   await mysqldump({
     connection: {
