@@ -54,6 +54,10 @@ section {
   padding: 50px 20px;
 }
 
+section.about {
+  padding: 150px 20px 50px;
+}
+
 icon {
   padding-left: 10px;
 }
