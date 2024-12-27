@@ -88,6 +88,17 @@ async function getDataMainPage() {
       []
     );
     result = result.map((row) => row.content);
+    let dataHead = [];
+    dataHead[0] = await selectQueryRowFactory(
+      connection,
+      'select title, metakeywords, metadescription from pages where content=?',
+      [result[0]]
+    );
+    dataHead[1] = await selectQueryRowFactory(
+      connection,
+      'select title, metakeywords, metadescription from pages where content=?',
+      [result[1]]
+    );
     let dataHeader = await selectQueryFactory(
       connection,
       'select * from indsection where content=?',
@@ -203,7 +214,14 @@ async function getDataMainPage() {
       metakeywords: row.metakeywords,
       metadescription: row.metadescription,
     }));
-    return { dataHeader, dataAbout, dataServices, dataArticles, dataSeo };
+    return {
+      dataHead,
+      dataHeader,
+      dataAbout,
+      dataServices,
+      dataArticles,
+      dataSeo,
+    };
   } catch (error) {
     reportServerError(error, res);
   } finally {
@@ -250,8 +268,16 @@ async function verificationUser(login, password) {
 webserver.get('/', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout, dataServices, dataArticles, dataSeo } = data;
+    const {
+      dataHead,
+      dataHeader,
+      dataAbout,
+      dataServices,
+      dataArticles,
+      dataSeo,
+    } = data;
     res.render('pages/main', {
+      dataHead,
       dataHeader,
       dataAbout,
       dataServices,
@@ -283,8 +309,9 @@ webserver.get('/admin', verifyAuthToken, async (req, res) => {
 webserver.get('/about', async (req, res) => {
   try {
     let data = await getDataMainPage();
-    const { dataHeader, dataAbout } = data;
+    const { dataHead, dataHeader, dataAbout } = data;
     res.render('pages/about', {
+      dataHead,
       dataHeader,
       dataAbout,
     });
