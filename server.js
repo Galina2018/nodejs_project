@@ -593,7 +593,7 @@ webserver.post('/dump', async (req, res) => {
     },
     dumpToFile: dumpFileName,
   });
-  res.send('Backup completed successfully.');
+  res.send(`Backup completed successfully. Файл ${dumpFileName}`);
 });
 
 webserver.listen(port, () => console.log('webserver running on port ' + port));
