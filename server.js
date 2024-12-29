@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const fsp = require('fs').promises;
 const multer = require('multer');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
@@ -10,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const res = require('express/lib/response');
 const mysqldump = require('mysqldump');
+const Jimp = require('jimp');
 
 const secret = 'thisshouldbeasecret';
 
@@ -25,7 +27,6 @@ const poolConfig = {
   host: 'localhost',
   user: 'root',
   password: '1234',
-  // password: '',
   database: 'project_db',
 };
 const pool = mysql.createPool(poolConfig);
@@ -67,10 +68,20 @@ function reportServerError(error, res) {
   logLineAsync(logFN, `[${port}] ` + error);
 }
 
+async function createThumbnail(imagePath, thumbnailPath) {
+  try {
+    const image = await Jimp.read(imagePath);
+    image.resize(60, Jimp.AUTO);
+    await image.writeAsync(thumbnailPath);
+  } catch (err) {
+    reportServerError(error, res);
+  }
+}
+
 function verifyAuthToken(req, res, next) {
   // console.log('in verifyAuthToken');
   const { token } = req.cookies;
-  jwt.verify(token, secret, function(err, decoded) {
+  jwt.verify(token, secret, function (err, decoded) {
     if (err) {
       return res.status(401).redirect('/login');
     }
@@ -120,7 +131,6 @@ async function getDataMainPage() {
       url: row.url,
     }));
     dataHeader[0].image = logo[0].url;
-
     let menuAnchor = await selectQueryFactory(
       connection,
       `select anchor from lists where code=?`,
@@ -385,7 +395,6 @@ webserver.post(
 
     try {
       connection = await newConnectionFactory(pool, res);
-
       if (req.files.headerLogo) {
         await modifyQueryFactory(
           connection,
@@ -394,6 +403,23 @@ webserver.post(
       ;`,
           [`/${req.files.headerLogo[0].originalname}`]
         );
+
+        // Создание миниатюры изображения
+        const imageDir = path.join(__dirname, '/public/images');
+        const imagePath = path.join(
+          imageDir,
+          req.files.headerLogo[0].originalname
+        );
+        const thumbnailDir = path.join(__dirname, '/public/thumbnails');
+        const thumbnailPath = path.join(
+          thumbnailDir,
+          'thumb_' + req.files.headerLogo[0].originalname
+        );
+        try {
+         await fsp.stat(thumbnailPath);
+        } catch(error) {
+          createThumbnail(imagePath, thumbnailPath);
+        }
       }
 
       for (let i = 0; i < headerMenu.length; i++) {
