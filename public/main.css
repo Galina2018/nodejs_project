@@ -25,12 +25,12 @@ header .logo img {
   max-width: 100px;
 }
 
-#headerForm img,
+/* #headerForm img,
 #aboutForm img,
 #serviceForm img,
 #articleForm img {
   height: 60px;
-}
+} */
 
 header nav ul {
   display: flex;

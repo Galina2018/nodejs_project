@@ -55,6 +55,7 @@ webserver.use(bodyParser.json({}));
 webserver.use(express.urlencoded({ extended: true }));
 webserver.use(express.static(path.resolve(__dirname, 'public')));
 webserver.use(express.static(path.resolve(__dirname, 'public/images')));
+webserver.use(express.static(path.resolve(__dirname, 'public/thumbnails')));
 webserver.use(
   '/tinymce',
   express.static(path.join(__dirname, 'node_modules', 'tinymce'))
@@ -68,12 +69,19 @@ function reportServerError(error, res) {
   logLineAsync(logFN, `[${port}] ` + error);
 }
 
+const imageDir = path.join(__dirname, '/public/images');
+const thumbnailDir = path.join(__dirname, '/public/thumbnails');
+
 async function createThumbnail(imagePath, thumbnailPath) {
   try {
     const image = await Jimp.read(imagePath);
+    const nameTemp = path.resolve(
+      thumbnailPath.split('.')[0] + '_temp' + '.' + thumbnailPath.split('.')[1]
+    );
     image.resize(60, Jimp.AUTO);
-    await image.writeAsync(thumbnailPath);
-  } catch (err) {
+    await image.writeAsync(nameTemp);
+    await fsp.rename(nameTemp, thumbnailPath);
+  } catch (error) {
     reportServerError(error, res);
   }
 }
@@ -81,7 +89,7 @@ async function createThumbnail(imagePath, thumbnailPath) {
 function verifyAuthToken(req, res, next) {
   // console.log('in verifyAuthToken');
   const { token } = req.cookies;
-  jwt.verify(token, secret, function (err, decoded) {
+  jwt.verify(token, secret, function(err, decoded) {
     if (err) {
       return res.status(401).redirect('/login');
     }
@@ -124,13 +132,15 @@ async function getDataMainPage() {
 
     let logo = await selectQueryFactory(
       connection,
-      'select url from images where code=?',
+      'select url, url_thumb from images where code=?',
       [dataHeader[0].image]
     );
     logo = logo.map((row) => ({
       url: row.url,
+      thumb: row.url_thumb,
     }));
     dataHeader[0].image = logo[0].url;
+    dataHeader[0].thumb = logo[0].thumb;
     let menuAnchor = await selectQueryFactory(
       connection,
       `select anchor from lists where code=?`,
@@ -160,13 +170,15 @@ async function getDataMainPage() {
 
     let foto = await selectQueryFactory(
       connection,
-      'select url from images where code=?',
+      'select url, url_thumb from images where code=?',
       [dataAbout[0].image]
     );
     foto = foto.map((row) => ({
       url: row.url,
+      thumb: row.url_thumb,
     }));
     dataAbout[0].image = foto[0].url;
+    dataAbout[0].thumb = foto[0].thumb;
 
     let dataServices = await selectQueryFactory(
       connection,
@@ -180,21 +192,24 @@ async function getDataMainPage() {
     }));
     let images = await selectQueryFactory(
       connection,
-      `select code, url from images `,
+      `select code, url, url_thumb from images `,
       []
     );
     images = images.map((row) => ({
       code: row.code,
       url: row.url,
+      thumb: row.url_thumb,
     }));
 
     dataServices = dataServices.map((e) => {
       const el = images.find((img) => img.code === e.image);
       if (el) {
         e.image = el.url;
+        e.thumb = el.thumb;
       } else e.image = '';
       return e;
     });
+
     let dataArticles = await selectQueryFactory(
       connection,
       `select name, text, image from group_section where content=10 and code='articles' order by code_order`,
@@ -209,6 +224,7 @@ async function getDataMainPage() {
       const el = images.find((img) => img.code === e.image);
       if (el) {
         e.image = el.url;
+        e.thumb = el.thumb;
       } else e.image = '';
       return e;
     });
@@ -405,21 +421,27 @@ webserver.post(
         );
 
         // Создание миниатюры изображения
-        const imageDir = path.join(__dirname, '/public/images');
         const imagePath = path.join(
           imageDir,
           req.files.headerLogo[0].originalname
         );
-        const thumbnailDir = path.join(__dirname, '/public/thumbnails');
         const thumbnailPath = path.join(
           thumbnailDir,
           'thumb_' + req.files.headerLogo[0].originalname
         );
         try {
-         await fsp.stat(thumbnailPath);
-        } catch(error) {
+          await fsp.stat(thumbnailPath);
+        } catch (error) {
           createThumbnail(imagePath, thumbnailPath);
         }
+        await modifyQueryFactory(
+          connection,
+          `
+                  update images set url_thumb=?
+                  where code='logo'
+              ;`,
+          [`/thumb_${req.files.headerLogo[0].originalname}`]
+        );
       }
 
       for (let i = 0; i < headerMenu.length; i++) {
@@ -502,6 +524,28 @@ webserver.post(
   ;`,
           [`/${req.files.aboutFoto[0].originalname}`]
         );
+        // Создание миниатюры изображения
+        const imagePath = path.join(
+          imageDir,
+          req.files.aboutFoto[0].originalname
+        );
+        const thumbnailPath = path.join(
+          thumbnailDir,
+          'thumb_' + req.files.aboutFoto[0].originalname
+        );
+        try {
+          await fsp.stat(thumbnailPath);
+        } catch (error) {
+          createThumbnail(imagePath, thumbnailPath);
+        }
+        await modifyQueryFactory(
+          connection,
+          `
+          update images set url_thumb=?
+          where code='foto'
+      ;`,
+          [`/thumb_${req.files.aboutFoto[0].originalname}`]
+        );
       }
       await modifyQueryFactory(
         connection,
@@ -541,6 +585,29 @@ webserver.post(
       update images set url=? where code=?
   ;`,
           [`/${req.files.serviceImage[0].originalname}`, imageCode]
+        );
+
+        // Создание миниатюры изображения
+        const imagePath = path.join(
+          imageDir,
+          req.files.serviceImage[0].originalname
+        );
+        const thumbnailPath = path.join(
+          thumbnailDir,
+          'thumb_' + req.files.serviceImage[0].originalname
+        );
+        try {
+          await fsp.stat(thumbnailPath);
+        } catch (error) {
+          createThumbnail(imagePath, thumbnailPath);
+        }
+        await modifyQueryFactory(
+          connection,
+          `
+          update images set url_thumb=?
+          where code=? 
+      ;`,
+          [`/thumb_${req.files.serviceImage[0].originalname}`, imageCode]
         );
       }
       await modifyQueryFactory(
@@ -588,6 +655,29 @@ webserver.post(
       update images set url=? where code=?
   ;`,
           [`/${req.files.articleImage[0].originalname}`, imageCode]
+        );
+
+        // Создание миниатюры изображения
+        const imagePath = path.join(
+          imageDir,
+          req.files.articleImage[0].originalname
+        );
+        const thumbnailPath = path.join(
+          thumbnailDir,
+          'thumb_' + req.files.articleImage[0].originalname
+        );
+        try {
+          await fsp.stat(thumbnailPath);
+        } catch (error) {
+          createThumbnail(imagePath, thumbnailPath);
+        }
+        await modifyQueryFactory(
+          connection,
+          `
+          update images set url_thumb=?
+          where code=? 
+      ;`,
+          [`/thumb_${req.files.articleImage[0].originalname}`, imageCode]
         );
       }
     } catch (error) {
