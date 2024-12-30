@@ -35,7 +35,7 @@
           <div class="row">
             <label for="headerLogo">Логотип</label>
             <p><%= dataHeader[0].image%></p>
-            <p><img src="#" id="previewHeaderLogo" /></p>
+            <p><img src="<%= dataHeader[0].thumb%>" id="previewHeaderLogo" /></p>
           </div>
           <input
             type="file"
@@ -108,7 +108,7 @@
           <div class="row">
             <label for="aboutFoto">Изображение (URL)</label>
             <p id="aboutImage" name="aboutImage"><%= dataAbout[0].image%></p>
-            <p><img src="#" id="previewAboutFoto" /></p>
+            <p><img src="<%= dataAbout[0].thumb%>" id="previewAboutFoto" /></p>
           </div>
           <input
             type="file"
@@ -152,7 +152,7 @@
             <div class="row">
               <label for="serviceImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataServices[i].image %></p>
-              <p><img src="#" id="previewServiceImage<%=i+1%>" /></p>
+              <p><img src="<%= dataServices[i].thumb%>" id="previewServiceImage<%=i+1%>" /></p>
             </div>
             <input
               type="file"
@@ -203,7 +203,8 @@
             <div class="row">
               <label for="articleImage<%=i+1%>">Изображение (URL)</label>
               <p><%= dataArticles[i].image %></p>
-              <p><img src="#" id="previewArticleImage<%=i+1%>" /></p>
+              <p><%= dataArticles[i].thumb%></p>
+              <p><img src="<%= dataArticles[i].thumb%>" id="previewArticleImage<%=i+1%>" /></p>
             </div>
             <input
               type="file"

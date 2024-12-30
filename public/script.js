@@ -19,31 +19,6 @@ function toMainPage(i) {
   if (i == 0) location.href = '/';
 }
 
-const headerLogo = document.getElementById('headerLogo');
-const previewHeaderLogo = document.getElementById('previewHeaderLogo');
-if (headerLogo?.defaultValue) {
-  previewHeaderLogo.src = `${headerLogo.defaultValue}`;
-}
-const aboutFoto = document.getElementById('aboutFoto');
-const previewAboutFoto = document.getElementById('previewAboutFoto');
-if (aboutFoto?.defaultValue) {
-  previewAboutFoto.src = `${aboutFoto.defaultValue}`;
-}
-for (let i = 1; i <= 3; i++) {
-  let inputImage = document.getElementById(`serviceImage${i}`);
-  let previewImage = document.getElementById(`previewServiceImage${i}`);
-  if (inputImage?.defaultValue) {
-    previewImage.src = `${inputImage.defaultValue}`;
-  }
-}
-for (let i = 1; i <= 3; i++) {
-  let inputImage = document.getElementById(`articleImage${i}`);
-  let previewImage = document.getElementById(`previewArticleImage${i}`);
-  if (inputImage?.defaultValue) {
-    previewImage.src = `${inputImage.defaultValue}`;
-  }
-}
-
 function loadFile(event, outputId) {
   let reader = new FileReader();
   reader.onload = function() {
@@ -116,6 +91,7 @@ async function saveAboutChange(evt) {
     method: 'POST',
     body: new FormData(aboutForm),
   });
+  reloadPage();
 }
 async function saveServiceChange(evt) {
   evt.preventDefault();
@@ -131,6 +107,7 @@ async function saveServiceChange(evt) {
     method: 'POST',
     body: dataService,
   });
+  reloadPage();
 }
 async function saveArticlesChange(evt) {
   evt.preventDefault();
@@ -147,6 +124,7 @@ async function saveArticlesChange(evt) {
     method: 'POST',
     body: dataArticles,
   });
+  reloadPage();
 }
 
 async function saveSeoChange(evt) {
